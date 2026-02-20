@@ -1,0 +1,75 @@
+graph TB
+    subgraph "Discovery Context (DISC)"
+        DISC[Job Scanner<br/>+ Scoring Engine]
+    end
+
+    subgraph "Application Context (APPL)"
+        APPL[Draft Generator<br/>+ Approval Queue]
+    end
+
+    subgraph "Market Context (MKTL)"
+        MKTL[Market Analyst]
+    end
+
+    subgraph "Career Strategy Context (CRST)"
+        CRST[Career Strategist]
+    end
+
+    subgraph "Dating Intelligence Context (DATE)"
+        DATE[Signal Collector<br/>+ Intelligence]
+    end
+
+    subgraph "Relocation Context (RELOC)"
+        RELOC[Relocation Analyst]
+    end
+
+    subgraph "Synthesis Context (SYNTH)"
+        SYNTH[Synthesis Engine]
+    end
+
+    subgraph "Dashboard Context (DASH)"
+        DASH[Web + iOS<br/>Dashboard]
+    end
+
+    subgraph "Learning Context (LEARN)"
+        LEARN[Scoring Loop<br/>+ Feedback Loop]
+    end
+
+    %% Event flows with ACLs
+    DISC -->|OpportunityDiscovered| APPL
+    DISC -->|OpportunityScored| CRST
+    DISC -->|OpportunityScored| LEARN
+    
+    APPL -->|DraftGenerated| CRST
+    APPL -->|DecisionMade| SYNTH
+    
+    MKTL -->|MarketReportPublished| CRST
+    MKTL -->|MarketReportPublished| SYNTH
+    
+    CRST -->|StrategyReportPublished| SYNTH
+    CRST -->|StrategyReportPublished| APPL
+    
+    DATE -->|SignalCollected| SYNTH
+    DATE -->|DatingReportPublished| SYNTH
+    
+    RELOC -->|RelocationReportPublished| SYNTH
+    
+    SYNTH -->|StateUpdated| DASH
+    SYNTH -->|ConflictDetected| DASH
+    SYNTH -->|AlertTriggered| DASH
+    
+    LEARN -->|WeightsAdjusted| DISC
+    LEARN -->|DriftDetected| CRST
+    
+    DASH -.->|User Actions| APPL
+    DASH -.->|User Actions| LEARN
+    
+    style DISC fill:#58a6ff
+    style APPL fill:#3fb950
+    style MKTL fill:#f0ad4e
+    style CRST fill:#bc8cff
+    style DATE fill:#ff6b9d
+    style RELOC fill:#7ee787
+    style SYNTH fill:#ffa657
+    style DASH fill:#d2a8ff
+    style LEARN fill:#56d4dd

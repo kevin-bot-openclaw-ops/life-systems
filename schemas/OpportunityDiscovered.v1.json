@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/OpportunityDiscovered.v1.json",
+  "title": "OpportunityDiscovered",
+  "description": "Published by DISC when a new job listing is found",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique event identifier"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this event was published (ISO 8601)"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1",
+      "description": "Schema version"
+    },
+    "source": {
+      "type": "string",
+      "const": "DISC",
+      "description": "Publishing context"
+    },
+    "data": {
+      "type": "object",
+      "required": ["opportunityId", "sourceUrl", "discoveredAt", "rawData"],
+      "properties": {
+        "opportunityId": {
+          "type": "string",
+          "description": "Unique identifier for this opportunity (DISC-owned)"
+        },
+        "sourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Original job posting URL"
+        },
+        "discoveredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this opportunity was first discovered"
+        },
+        "rawData": {
+          "type": "object",
+          "description": "Extracted data from job posting (flexible schema)",
+          "properties": {
+            "title": {"type": "string"},
+            "company": {"type": "string"},
+            "location": {"type": "string"},
+            "salary": {"type": "string"},
+            "description": {"type": "string"},
+            "requirements": {"type": "array", "items": {"type": "string"}},
+            "postedDate": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

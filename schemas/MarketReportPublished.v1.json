@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/MarketReportPublished.v1.json",
+  "title": "MarketReportPublished",
+  "description": "Published by MKTL with market analysis",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "MKTL"},
+    "data": {
+      "type": "object",
+      "required": ["reportId", "period", "insights"],
+      "properties": {
+        "reportId": {"type": "string"},
+        "period": {
+          "type": "object",
+          "properties": {
+            "start": {"type": "string", "format": "date"},
+            "end": {"type": "string", "format": "date"}
+          }
+        },
+        "insights": {
+          "type": "object",
+          "properties": {
+            "trendingSkills": {"type": "array", "items": {"type": "string"}},
+            "salaryTrends": {"type": "object"},
+            "demandHotspots": {"type": "array"},
+            "recommendations": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    }
+  }
+}

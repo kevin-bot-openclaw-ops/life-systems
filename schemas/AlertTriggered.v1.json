@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/AlertTriggered.v1.json",
+  "title": "AlertTriggered",
+  "description": "Published by SYNTH when actionable alert is triggered",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "SYNTH"},
+    "data": {
+      "type": "object",
+      "required": ["alertId", "alertType", "message"],
+      "properties": {
+        "alertId": {"type": "string"},
+        "alertType": {
+          "type": "string",
+          "enum": ["OPPORTUNITY", "DEADLINE", "THRESHOLD", "ANOMALY"]
+        },
+        "message": {"type": "string"},
+        "priority": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"]
+        },
+        "actionRequired": {"type": "boolean"}
+      }
+    }
+  }
+}

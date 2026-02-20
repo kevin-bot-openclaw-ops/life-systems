@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/DecisionMade.v1.json",
+  "title": "DecisionMade",
+  "description": "Published by APPL when user approves/rejects a draft",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "APPL"},
+    "data": {
+      "type": "object",
+      "required": ["draftId", "opportunityId", "decision", "decidedAt"],
+      "properties": {
+        "draftId": {"type": "string"},
+        "opportunityId": {"type": "string"},
+        "decision": {
+          "type": "string",
+          "enum": ["APPROVED", "REJECTED", "REVISED"]
+        },
+        "decidedAt": {"type": "string", "format": "date-time"},
+        "feedback": {
+          "type": "string",
+          "description": "User feedback on the draft"
+        }
+      }
+    }
+  }
+}

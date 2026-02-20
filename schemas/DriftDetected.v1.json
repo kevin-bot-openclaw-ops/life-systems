@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/DriftDetected.v1.json",
+  "title": "DriftDetected",
+  "description": "Published by LEARN when model drift is detected",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "LEARN"},
+    "data": {
+      "type": "object",
+      "required": ["driftType", "severity"],
+      "properties": {
+        "driftType": {
+          "type": "string",
+          "enum": ["SCORING", "STRATEGY", "MARKET"]
+        },
+        "severity": {"type": "number", "minimum": 0, "maximum": 1},
+        "recommendation": {"type": "string"}
+      }
+    }
+  }
+}

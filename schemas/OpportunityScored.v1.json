@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/OpportunityScored.v1.json",
+  "title": "OpportunityScored",
+  "description": "Published by DISC after scoring a job opportunity",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "DISC"},
+    "data": {
+      "type": "object",
+      "required": ["opportunityId", "score", "signals"],
+      "properties": {
+        "opportunityId": {
+          "type": "string",
+          "description": "References opportunity from OpportunityDiscovered"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall relevance score (0-100)"
+        },
+        "signals": {
+          "type": "object",
+          "description": "Scoring breakdown",
+          "properties": {
+            "roleMatch": {"type": "number", "minimum": 0, "maximum": 100},
+            "salaryMatch": {"type": "number", "minimum": 0, "maximum": 100},
+            "locationMatch": {"type": "number", "minimum": 0, "maximum": 100},
+            "skillMatch": {"type": "number", "minimum": 0, "maximum": 100},
+            "companyMatch": {"type": "number", "minimum": 0, "maximum": 100}
+          }
+        },
+        "verdict": {
+          "type": "string",
+          "enum": ["APPLY", "MAYBE", "PASS"],
+          "description": "Recommended action"
+        }
+      }
+    }
+  }
+}
