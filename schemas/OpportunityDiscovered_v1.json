@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/OpportunityDiscovered_v1.json",
+  "title": "OpportunityDiscovered",
+  "description": "Job listing discovered from external sources",
+  "type": "object",
+  "required": ["event_type", "version", "timestamp", "context", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "const": "OpportunityDiscovered"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "string",
+      "const": "DISC"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["listing_id", "company", "role", "description", "location", "discovered_at", "url"],
+      "properties": {
+        "listing_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "company": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string",
+          "enum": ["remote", "hybrid", "onsite"]
+        },
+        "salary_range": {
+          "type": "object",
+          "properties": {
+            "min": {"type": "number", "minimum": 0},
+            "max": {"type": "number", "minimum": 0},
+            "currency": {"type": "string", "enum": ["EUR", "USD", "GBP", "PLN"]}
+          }
+        },
+        "tech_stack": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "seniority": {
+          "type": "string",
+          "enum": ["junior", "mid", "senior", "staff", "principal", "unknown"]
+        },
+        "sources": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "discovered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/DecisionMade_v1.json",
+  "title": "DecisionMade",
+  "description": "Human decision on application draft (approve/reject/defer)",
+  "type": "object",
+  "required": ["event_type", "version", "timestamp", "context", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "const": "DecisionMade"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "string",
+      "const": "APPL"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["draft_id", "listing_id", "decision", "response_received"],
+      "properties": {
+        "draft_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "listing_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["approved", "rejected", "deferred"]
+        },
+        "reason": {
+          "type": ["string", "null"]
+        },
+        "applied_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "response_received": {
+          "type": "boolean"
+        },
+        "response_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

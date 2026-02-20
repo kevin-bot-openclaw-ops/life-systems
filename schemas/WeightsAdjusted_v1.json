@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/WeightsAdjusted_v1.json",
+  "title": "WeightsAdjusted",
+  "description": "Scoring weight adjustment based on preference learning",
+  "type": "object",
+  "required": ["event_type", "version", "timestamp", "context", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "const": "WeightsAdjusted"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "string",
+      "const": "LEARN"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["dimension", "old_weight", "new_weight", "reason", "confidence", "decisions_analyzed"],
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "enum": ["remote_match", "ai_ml_relevance", "seniority_match", "salary_match", "fintech_bonus"]
+        },
+        "old_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "new_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reason": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "decisions_analyzed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

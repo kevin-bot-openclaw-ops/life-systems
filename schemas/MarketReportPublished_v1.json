@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/MarketReportPublished_v1.json",
+  "title": "MarketReportPublished",
+  "description": "Weekly market intelligence report (skill demand, salary ranges, gap analysis)",
+  "type": "object",
+  "required": ["event_type", "version", "timestamp", "context", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "const": "MarketReportPublished"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "string",
+      "const": "MKTL"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["week", "top_skills", "salary_ranges", "gap_analysis", "sample_size"],
+      "properties": {
+        "week": {
+          "type": "string",
+          "pattern": "^\\d{4}-W\\d{2}$"
+        },
+        "top_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "demand_count", "trend", "required_vs_nice"],
+            "properties": {
+              "skill": {"type": "string"},
+              "demand_count": {"type": "integer", "minimum": 0},
+              "trend": {"type": "string", "enum": ["rising", "stable", "falling"]},
+              "required_vs_nice": {
+                "type": "object",
+                "properties": {
+                  "required": {"type": "integer", "minimum": 0},
+                  "nice_to_have": {"type": "integer", "minimum": 0}
+                }
+              }
+            }
+          }
+        },
+        "salary_ranges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role_type", "min", "max", "median", "currency", "sample_size"],
+            "properties": {
+              "role_type": {"type": "string"},
+              "min": {"type": "number"},
+              "max": {"type": "number"},
+              "median": {"type": "number"},
+              "currency": {"type": "string", "enum": ["EUR", "USD", "GBP", "PLN"]},
+              "sample_size": {"type": "integer", "minimum": 0}
+            }
+          }
+        },
+        "gap_analysis": {
+          "type": "object",
+          "required": ["jurek_has", "market_wants", "gaps"],
+          "properties": {
+            "jurek_has": {"type": "array", "items": {"type": "string"}},
+            "market_wants": {"type": "array", "items": {"type": "string"}},
+            "gaps": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "sample_size": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

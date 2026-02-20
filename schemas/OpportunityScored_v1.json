@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/OpportunityScored_v1.json",
+  "title": "OpportunityScored",
+  "description": "Job listing with calculated relevance score",
+  "type": "object",
+  "required": ["event_type", "version", "timestamp", "context", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "const": "OpportunityScored"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "string",
+      "const": "DISC"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["listing_id", "score", "breakdown", "weights", "rejected"],
+      "properties": {
+        "listing_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "breakdown": {
+          "type": "object",
+          "required": ["remote_match", "ai_ml_relevance", "seniority_match", "salary_match", "fintech_bonus"],
+          "properties": {
+            "remote_match": {"type": "number", "minimum": 0, "maximum": 100},
+            "ai_ml_relevance": {"type": "number", "minimum": 0, "maximum": 100},
+            "seniority_match": {"type": "number", "minimum": 0, "maximum": 100},
+            "salary_match": {"type": "number", "minimum": 0, "maximum": 100},
+            "fintech_bonus": {"type": "number", "minimum": 0, "maximum": 20}
+          }
+        },
+        "weights": {
+          "type": "object",
+          "required": ["remote_match", "ai_ml_relevance", "seniority_match", "salary_match", "fintech_bonus"],
+          "properties": {
+            "remote_match": {"type": "number", "minimum": 0, "maximum": 1},
+            "ai_ml_relevance": {"type": "number", "minimum": 0, "maximum": 1},
+            "seniority_match": {"type": "number", "minimum": 0, "maximum": 1},
+            "salary_match": {"type": "number", "minimum": 0, "maximum": 1},
+            "fintech_bonus": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "rejected": {
+          "type": "boolean"
+        },
+        "rejection_reason": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}
