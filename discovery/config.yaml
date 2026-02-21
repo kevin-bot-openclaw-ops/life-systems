@@ -1,0 +1,52 @@
+# Job scanner configuration
+# Enable/disable sources without code changes
+
+sources:
+  # Phase 1: MVP sources (easiest to implement)
+  hn_algolia:
+    enabled: true
+    priority: 1
+    description: "Hacker News Who is Hiring via Algolia API"
+  
+  working_nomads:
+    enabled: true
+    priority: 1
+    description: "WorkingNomads.com remote job board"
+  
+  aijobs_uk:
+    enabled: true
+    priority: 1
+    description: "AIJobs.co.uk WordPress REST API"
+  
+  # Phase 2: Additional sources (to be implemented)
+  mlsjobs_io:
+    enabled: false
+    priority: 2
+    description: "MLjobs.io - ML-specific job board"
+  
+  levels_fyi:
+    enabled: false
+    priority: 2
+    description: "Levels.fyi - salary data + job listings"
+  
+  # Phase 3: Complex sources (defer to M2)
+  contra:
+    enabled: false
+    priority: 3
+    description: "Contra.com - freelance AI/ML projects"
+  
+  linkedin:
+    enabled: false
+    priority: 3
+    description: "LinkedIn Jobs - requires auth + browser automation"
+
+# Output configuration
+output:
+  events_dir: "./events"
+  seen_db: "./events/seen_listings.json"
+
+# Scan schedule (for cron integration)
+schedule:
+  frequency: "daily"
+  time: "08:00"  # 8 AM local time
+  timezone: "GMT"
