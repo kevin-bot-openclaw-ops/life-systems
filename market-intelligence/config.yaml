@@ -1,0 +1,77 @@
+# Market Intelligence Configuration
+
+jurek_profile:
+  # Current skills (as of Feb 2026)
+  skills:
+    - Python
+    - Java
+    - Spring Boot
+    - Docker
+    - AWS
+    - Kubernetes
+    - LangChain
+    - RAG
+    - Claude API
+    - FastAPI
+    - PostgreSQL
+    - Kafka
+    - System Design
+    - Banking Domain
+    - Microservices
+    - CI/CD
+  
+  # Target role types (for salary analysis)
+  target_roles:
+    - AI Engineer
+    - ML Engineer
+    - AI Platform Engineer
+    - Agent Systems Engineer
+    - LLM Engineer
+
+# Skills taxonomy (for normalization)
+skill_synonyms:
+  Python: [python, python3, py]
+  PyTorch: [pytorch, torch]
+  TensorFlow: [tensorflow, tf, keras]
+  Kubernetes: [kubernetes, k8s, kubectl]
+  LangChain: [langchain, langchain.js]
+  LLM: [llm, large language model, gpt, claude]
+  RAG: [rag, retrieval augmented generation]
+  Vector DB: [vector database, pinecone, weaviate, chroma, faiss, milvus]
+  MLflow: [mlflow, ml flow]
+  Hugging Face: [huggingface, hf, transformers]
+  FastAPI: [fastapi, fast api]
+
+# Required vs nice-to-have patterns
+required_patterns:
+  - "required"
+  - "must have"
+  - "essential"
+  - "mandatory"
+  - "strong experience"
+  - "expertise in"
+  - "proficiency"
+
+nice_to_have_patterns:
+  - "nice to have"
+  - "preferred"
+  - "bonus"
+  - "plus"
+  - "desirable"
+  - "familiarity"
+
+# Salary filters
+salary:
+  min_usd: 100000  # Below this = filtered out
+  target_usd: 150000  # Jurek's target
+
+# Trend detection
+trend:
+  min_data_points: 2  # Require at least 2 weeks of data
+  significant_change_pct: 0.15  # 15% change = significant
+
+# Report settings
+report:
+  top_n_skills: 10
+  period_days: 7
+  min_listings_per_cycle: 100
