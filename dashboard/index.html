@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Systems Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f1419;
+            color: #e7e9ea;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2f3336;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1d9bf0;
+            margin-bottom: 10px;
+        }
+
+        .timestamp {
+            color: #71767b;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #16181c;
+            border: 1px solid #2f3336;
+            border-radius: 16px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #1d9bf0;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #e7e9ea;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #2f3336;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #71767b;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .opportunity {
+            background: #1c1f26;
+            border-left: 3px solid #1d9bf0;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+
+        .opportunity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .opportunity-company {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #e7e9ea;
+        }
+
+        .opportunity-score {
+            background: #1d9bf0;
+            color: #0f1419;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .opportunity-role {
+            color: #71767b;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .opportunity-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: #71767b;
+        }
+
+        .status {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-applied {
+            background: #00ba7c20;
+            color: #00ba7c;
+        }
+
+        .status-draft {
+            background: #ffd40020;
+            color: #ffd400;
+        }
+
+        .status-screening {
+            background: #1d9bf020;
+            color: #1d9bf0;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .skill {
+            background: #1c1f26;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skill-count {
+            background: #1d9bf0;
+            color: #0f1419;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .trend {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .trend-up {
+            background: #00ba7c20;
+            color: #00ba7c;
+        }
+
+        .trend-down {
+            background: #f9186020;
+            color: #f91860;
+        }
+
+        .trend-stable {
+            background: #71767b20;
+            color: #71767b;
+        }
+
+        .event {
+            background: #1c1f26;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #00ba7c;
+        }
+
+        .event-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .event-meta {
+            font-size: 0.85rem;
+            color: #71767b;
+        }
+
+        .city-ranking {
+            background: #1c1f26;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+
+        .city-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .city-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .city-score {
+            background: #1d9bf0;
+            color: #0f1419;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .city-pros-cons {
+            font-size: 0.85rem;
+            color: #71767b;
+            margin-top: 6px;
+        }
+
+        .alert {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .alert-critical {
+            background: #f9186010;
+            border-color: #f91860;
+        }
+
+        .alert-warning {
+            background: #ffd40010;
+            border-color: #ffd400;
+        }
+
+        .alert-info {
+            background: #1d9bf010;
+            border-color: #1d9bf0;
+        }
+
+        .alert-message {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .alert-severity {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .conflict {
+            background: #ffd40010;
+            border: 1px solid #ffd400;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .conflict-summary {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffd400;
+        }
+
+        .perspective {
+            background: #1c1f26;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 6px;
+        }
+
+        .perspective-advisor {
+            font-weight: 700;
+            color: #1d9bf0;
+            margin-bottom: 4px;
+        }
+
+        .perspective-recommendation {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .confidence {
+            display: inline-block;
+            background: #2f3336;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-top: 6px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1d9bf0;
+            border-bottom: 2px solid #1d9bf0;
+            padding-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .opportunity-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        .progress-bar {
+            background: #2f3336;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1d9bf0, #00ba7c);
+            transition: width 0.3s;
+        }
+
+        .next-action {
+            background: #00ba7c20;
+            border: 1px solid #00ba7c;
+            color: #00ba7c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Life Systems Dashboard</h1>
+            <div class="timestamp" id="timestamp">Loading...</div>
+        </header>
+
+        <div id="alerts-section" class="section"></div>
+        <div id="conflicts-section" class="section"></div>
+
+        <div class="grid">
+            <div id="career-section" class="card"></div>
+            <div id="market-section" class="card"></div>
+            <div id="dating-section" class="card"></div>
+            <div id="relocation-section" class="card"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration: swap this to load real data
+        const DATA_SOURCE = './mock-data.json';
+        
+        async function loadDashboard() {
+            try {
+                const response = await fetch(DATA_SOURCE);
+                const data = await response.json();
+                
+                renderDashboard(data);
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+                document.body.innerHTML = '<div style="text-align:center;margin-top:100px;color:#f91860;">Failed to load dashboard data. Check console for details.</div>';
+            }
+        }
+
+        function renderDashboard(data) {
+            const { sections, conflicts, alerts } = data.payload;
+            
+            // Timestamp
+            document.getElementById('timestamp').textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+            
+            // Alerts
+            renderAlerts(alerts);
+            
+            // Conflicts
+            renderConflicts(conflicts);
+            
+            // Career Section
+            renderCareerSection(sections.career);
+            
+            // Market Section
+            renderMarketSection(sections.market);
+            
+            // Dating Section
+            renderDatingSection(sections.dating);
+            
+            // Relocation Section
+            renderRelocationSection(sections.relocation);
+        }
+
+        function renderAlerts(alerts) {
+            const container = document.getElementById('alerts-section');
+            if (!alerts || alerts.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = '<div class="section-header">⚠️ Alerts</div>';
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            
+            alerts.forEach(alert => {
+                const div = document.createElement('div');
+                div.className = `alert alert-${alert.severity}`;
+                div.innerHTML = `
+                    <div class="alert-severity">${alert.severity}</div>
+                    <div class="alert-message">${alert.message}</div>
+                `;
+                grid.appendChild(div);
+            });
+            
+            container.appendChild(grid);
+        }
+
+        function renderConflicts(conflicts) {
+            const container = document.getElementById('conflicts-section');
+            if (!conflicts || conflicts.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = '<div class="section-header">⚔️ Conflicts</div>';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'grid full-width';
+            
+            conflicts.forEach(conflict => {
+                const div = document.createElement('div');
+                div.className = 'conflict';
+                
+                let perspectivesHTML = '';
+                conflict.perspectives.forEach(p => {
+                    perspectivesHTML += `
+                        <div class="perspective">
+                            <div class="perspective-advisor">${p.advisor}</div>
+                            <div class="perspective-recommendation">${p.recommendation}</div>
+                            <span class="confidence">Confidence: ${(p.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                    `;
+                });
+                
+                div.innerHTML = `
+                    <div class="conflict-summary">${conflict.summary}</div>
+                    ${perspectivesHTML}
+                `;
+                wrapper.appendChild(div);
+            });
+            
+            container.appendChild(wrapper);
+        }
+
+        function renderCareerSection(career) {
+            const container = document.getElementById('career-section');
+            
+            const funnel = career.pipeline_summary;
+            const conversionRate = (funnel.response / funnel.applied * 100).toFixed(1);
+            
+            let opportunitiesHTML = '';
+            career.top_opportunities.forEach(opp => {
+                const statusClass = opp.status.replace('_', '-');
+                opportunitiesHTML += `
+                    <div class="opportunity">
+                        <div class="opportunity-header">
+                            <div>
+                                <div class="opportunity-company">${opp.company}</div>
+                                <div class="opportunity-role">${opp.role}</div>
+                            </div>
+                            <div class="opportunity-score">${opp.score}</div>
+                        </div>
+                        <div class="opportunity-meta">
+                            <span>${opp.location}</span>
+                            <span>${opp.salary_range}</span>
+                            <span class="status status-${statusClass}">${opp.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div class="card-title">💼 Career Pipeline</div>
+                <div class="metric">
+                    <span class="metric-label">Discovered</span>
+                    <span class="metric-value">${funnel.discovered}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Applied</span>
+                    <span class="metric-value">${funnel.applied}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Response Rate</span>
+                    <span class="metric-value">${conversionRate}%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Interviews</span>
+                    <span class="metric-value">${funnel.interview}</span>
+                </div>
+                <div style="margin-top: 20px; margin-bottom: 12px; font-weight: 600;">Top Opportunities</div>
+                ${opportunitiesHTML}
+                <div class="next-action">${career.next_action}</div>
+            `;
+        }
+
+        function renderMarketSection(market) {
+            const container = document.getElementById('market-section');
+            
+            let skillsHTML = '';
+            market.top_skills.slice(0, 8).forEach(skill => {
+                const trendClass = `trend-${skill.trend}`;
+                skillsHTML += `
+                    <div class="skill">
+                        <span>${skill.skill}</span>
+                        <span class="skill-count">${skill.demand_count}</span>
+                        <span class="trend ${trendClass}">${skill.trend === 'up' ? '↑' : skill.trend === 'down' ? '↓' : '→'}</span>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div class="card-title">📊 Market Trends</div>
+                <div style="margin-bottom: 12px; font-weight: 600;">Top Skills</div>
+                <div class="skill-list">
+                    ${skillsHTML}
+                </div>
+                <div style="margin-top: 16px; margin-bottom: 8px; font-weight: 600;">Salary Ranges (EUR)</div>
+                <div class="metric">
+                    <span class="metric-label">Senior ML Engineer</span>
+                    <span class="metric-value">€${(market.salary_ranges.senior_ml_engineer.median / 1000).toFixed(0)}k</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">ML Platform Engineer</span>
+                    <span class="metric-value">€${(market.salary_ranges.ml_platform_engineer.median / 1000).toFixed(0)}k</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">AI Architect</span>
+                    <span class="metric-value">€${(market.salary_ranges.ai_architect.median / 1000).toFixed(0)}k</span>
+                </div>
+                <div style="margin-top: 16px; padding: 12px; background: #1c1f26; border-radius: 8px; font-size: 0.9rem; line-height: 1.5;">
+                    ${market.weekly_summary}
+                </div>
+            `;
+        }
+
+        function renderDatingSection(dating) {
+            const container = document.getElementById('dating-section');
+            
+            const hoursProgress = (dating.weekly_hours / dating.target_hours * 100).toFixed(0);
+            
+            let eventsHTML = '';
+            dating.upcoming_events.forEach(event => {
+                eventsHTML += `
+                    <div class="event">
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-meta">
+                            ${new Date(event.date).toLocaleDateString()} at ${event.time} | ${event.location}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div class="card-title">💃 Dating & Social</div>
+                <div class="metric">
+                    <span class="metric-label">Weekly Hours</span>
+                    <span class="metric-value">${dating.weekly_hours} / ${dating.target_hours}h</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${hoursProgress}%"></div>
+                </div>
+                <div style="margin-top: 16px; margin-bottom: 8px; font-weight: 600;">Activity Breakdown</div>
+                <div class="metric">
+                    <span class="metric-label">Bachata</span>
+                    <span class="metric-value">${dating.activity_breakdown.bachata}h</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Dating Apps</span>
+                    <span class="metric-value">${dating.activity_breakdown.dating_apps}h</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Social Events</span>
+                    <span class="metric-value">${dating.activity_breakdown.social_events}h</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Gym</span>
+                    <span class="metric-value">${dating.activity_breakdown.gym}h</span>
+                </div>
+                <div style="margin-top: 16px; margin-bottom: 8px; font-weight: 600;">Upcoming Events</div>
+                ${eventsHTML}
+                <div style="margin-top: 16px; padding: 12px; background: #1c1f26; border-radius: 8px; font-size: 0.85rem; line-height: 1.5; font-style: italic; color: #71767b;">
+                    ${dating.reflection_prompt}
+                </div>
+            `;
+        }
+
+        function renderRelocationSection(relocation) {
+            const container = document.getElementById('relocation-section');
+            
+            let citiesHTML = '';
+            relocation.city_rankings.slice(0, 4).forEach(city => {
+                const isCurrent = city.city.includes('current');
+                citiesHTML += `
+                    <div class="city-ranking" ${isCurrent ? 'style="border: 1px solid #00ba7c;"' : ''}>
+                        <div class="city-header">
+                            <div class="city-name">${city.city}</div>
+                            <div class="city-score">${city.overall_score}</div>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Cost of Living</span>
+                            <span class="metric-value">€${city.cost_of_living_monthly}/mo</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Net Income (€150k)</span>
+                            <span class="metric-value">€${(city.net_income_150k / 1000).toFixed(0)}k</span>
+                        </div>
+                        <div class="city-pros-cons">
+                            <strong>Pros:</strong> ${city.pros}<br>
+                            <strong>Cons:</strong> ${city.cons}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div class="card-title">🌍 Relocation</div>
+                <div style="margin-bottom: 12px; font-weight: 600;">City Rankings</div>
+                ${citiesHTML}
+                <div style="margin-top: 16px; padding: 12px; background: #1c1f26; border-radius: 8px; font-size: 0.9rem; line-height: 1.5;">
+                    <strong>Recommendation:</strong> ${relocation.recommendation}
+                </div>
+            `;
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
