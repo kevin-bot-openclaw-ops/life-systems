@@ -1,0 +1,60 @@
+weights:
+  remote_match: 0.40  # 40% weight - remote is mandatory
+  ai_ml_relevance: 0.30  # 30% weight - AI/ML keyword match
+  seniority_match: 0.15  # 15% weight - senior/staff/principal
+  salary_match: 0.10  # 10% weight - €150k+ target
+  fintech_bonus: 0.05  # 5% weight - banking/fintech bonus
+
+hard_filters:
+  require_remote: true  # Reject non-remote roles
+  salary_floor_eur: 120000  # €120k minimum (reject below)
+
+ai_ml_keywords:
+  - ai
+  - ml
+  - machine learning
+  - artificial intelligence
+  - llm
+  - nlp
+  - deep learning
+  - neural network
+  - transformer
+  - gpt
+  - bert
+  - rag
+  - retrieval
+  - embedding
+  - vector
+  - langchain
+  - openai
+  - anthropic
+  - agent
+  - automation
+  - generative
+  - computer vision
+  - reinforcement learning
+
+fintech_keywords:
+  - fintech
+  - banking
+  - financial
+  - credit
+  - payment
+  - trading
+  - risk
+  - compliance
+  - fraud
+  - kyc
+  - aml
+  - basel
+  - dodd-frank
+  - hedge fund
+  - investment
+  - securities
+  - blockchain
+  - crypto
+
+target_seniority:
+  - senior
+  - staff
+  - principal

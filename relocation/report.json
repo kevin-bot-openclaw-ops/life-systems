@@ -1,0 +1,512 @@
+{
+  "event_type": "RelocationReportPublished",
+  "version": "v1",
+  "timestamp": "2026-02-22T01:05:10.801131Z",
+  "context": "RELOC",
+  "payload": {
+    "report_date": "2026-02-22",
+    "cities": [
+      {
+        "city": "Lisbon",
+        "country": "Portugal",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 2267,
+            "rent_1br": 1367,
+            "living_costs": 900,
+            "confidence": "HIGH",
+            "sources": [
+              "Numbeo",
+              "idealista.pt"
+            ],
+            "notes": "Cross-validated: Numbeo \u20ac2,167-2,367, idealista \u20ac1,400-1,800. Variance 25%."
+          },
+          "dating_pool": {
+            "proxy_score": 85,
+            "census_data": 95,
+            "university_students": 75000,
+            "expat_community": "large",
+            "nightlife_rating": 8,
+            "confidence": "MEDIUM",
+            "methodology": "Census 95k single women 25-35 + 75k university students + large expat community + strong nightlife scene"
+          },
+          "tax": {
+            "effective_rate": 28,
+            "beckham_eligible": false,
+            "special_regime": "NHR (Non-Habitual Resident) - flat 20% for 10 years if eligible",
+            "net_from_gross": {
+              "150k": 108000,
+              "180k": 129600,
+              "200k": 144000
+            },
+            "confidence": "HIGH",
+            "notes": "NHR regime available for new residents. After NHR: progressive 14.5-48%."
+          },
+          "flights": {
+            "hub_connectivity": 9,
+            "direct_routes": 120,
+            "avg_cost_to_warsaw": 150,
+            "frequency_per_week": 28,
+            "confidence": "HIGH",
+            "notes": "Major EU hub. Lisbon (LIS) to Warsaw (WAW): 4 daily flights, \u20ac100-200 RT."
+          },
+          "lifestyle": {
+            "score": 8.5,
+            "weather_rating": 9,
+            "safety_rating": 7,
+            "coworking_spaces": 50,
+            "bachata_scene": "strong",
+            "expat_community": "large",
+            "confidence": "HIGH",
+            "notes": "Mediterranean climate, vibrant nightlife, large expat community, strong bachata scene."
+          }
+        },
+        "overall_score": 65.2
+      },
+      {
+        "city": "Barcelona",
+        "country": "Spain",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 2400,
+            "rent_1br": 1400,
+            "living_costs": 1000,
+            "confidence": "HIGH",
+            "sources": [
+              "Numbeo"
+            ],
+            "notes": "Similar to Lisbon, slightly higher rent."
+          },
+          "dating_pool": {
+            "proxy_score": 90,
+            "census_data": 180,
+            "university_students": 150000,
+            "expat_community": "large",
+            "nightlife_rating": 9,
+            "confidence": "MEDIUM",
+            "methodology": "180k single women 25-35 + 150k students + huge expat community + world-class nightlife"
+          },
+          "tax": {
+            "effective_rate": 24,
+            "beckham_eligible": true,
+            "special_regime": "Beckham Law - flat 24% for 6 years",
+            "net_from_gross": {
+              "150k": 114000,
+              "180k": 136800,
+              "200k": 152000
+            },
+            "confidence": "HIGH",
+            "notes": "Beckham Law: \u20ac600k income cap, cannot have been Spanish tax resident in past 10 years."
+          },
+          "flights": {
+            "hub_connectivity": 10,
+            "direct_routes": 180,
+            "avg_cost_to_warsaw": 120,
+            "frequency_per_week": 35,
+            "confidence": "HIGH",
+            "notes": "Barcelona (BCN) to Warsaw (WAW): 5 daily flights, \u20ac80-150 RT."
+          },
+          "lifestyle": {
+            "score": 9,
+            "weather_rating": 9,
+            "safety_rating": 6,
+            "coworking_spaces": 80,
+            "bachata_scene": "strong",
+            "expat_community": "large",
+            "confidence": "HIGH",
+            "notes": "Beach + city, world-class food, vibrant nightlife, strong bachata/salsa scene."
+          }
+        },
+        "overall_score": 67.9
+      },
+      {
+        "city": "Canary Islands",
+        "country": "Spain",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 1900,
+            "rent_1br": 1100,
+            "living_costs": 800,
+            "confidence": "MEDIUM",
+            "sources": [
+              "Numbeo",
+              "local research TASK-003"
+            ],
+            "notes": "\u20ac1,800-2,200/month per TASK-003. Lower than mainland Spain."
+          },
+          "dating_pool": {
+            "proxy_score": 60,
+            "census_data": 25,
+            "university_students": 20000,
+            "expat_community": "medium",
+            "nightlife_rating": 6,
+            "confidence": "MEDIUM",
+            "methodology": "Small local population + seasonal tourists + growing digital nomad community"
+          },
+          "tax": {
+            "effective_rate": 24,
+            "beckham_eligible": true,
+            "special_regime": "Beckham Law - flat 24% for 6 years",
+            "net_from_gross": {
+              "150k": 114000,
+              "180k": 136800,
+              "200k": 152000
+            },
+            "confidence": "HIGH",
+            "notes": "Same Beckham Law as Barcelona. Additional Canary Islands tax benefits (reduced VAT)."
+          },
+          "flights": {
+            "hub_connectivity": 7,
+            "direct_routes": 60,
+            "avg_cost_to_warsaw": 200,
+            "frequency_per_week": 14,
+            "confidence": "MEDIUM",
+            "notes": "Fuerteventura (FUE) + Lanzarote ferry. To Warsaw: 1-2 stops, \u20ac150-250 RT."
+          },
+          "lifestyle": {
+            "score": 8,
+            "weather_rating": 10,
+            "safety_rating": 9,
+            "coworking_spaces": 15,
+            "bachata_scene": "moderate",
+            "expat_community": "medium",
+            "confidence": "HIGH",
+            "notes": "Year-round sunshine, surf, safe, quiet. Smaller social scene than Barcelona/Lisbon."
+          }
+        },
+        "overall_score": 63.9
+      },
+      {
+        "city": "Valencia",
+        "country": "Spain",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 2100,
+            "rent_1br": 1200,
+            "living_costs": 900,
+            "confidence": "HIGH",
+            "sources": [
+              "Numbeo"
+            ],
+            "notes": "Cheaper than Barcelona, similar to Lisbon."
+          },
+          "dating_pool": {
+            "proxy_score": 75,
+            "census_data": 85,
+            "university_students": 65000,
+            "expat_community": "medium",
+            "nightlife_rating": 7,
+            "confidence": "MEDIUM",
+            "methodology": "85k single women 25-35 + 65k students + growing expat community"
+          },
+          "tax": {
+            "effective_rate": 24,
+            "beckham_eligible": true,
+            "special_regime": "Beckham Law - flat 24% for 6 years",
+            "net_from_gross": {
+              "150k": 114000,
+              "180k": 136800,
+              "200k": 152000
+            },
+            "confidence": "HIGH",
+            "notes": "Same Beckham Law as Barcelona."
+          },
+          "flights": {
+            "hub_connectivity": 8,
+            "direct_routes": 90,
+            "avg_cost_to_warsaw": 140,
+            "frequency_per_week": 21,
+            "confidence": "HIGH",
+            "notes": "Valencia (VLC) to Warsaw (WAW): 3 daily flights, \u20ac90-180 RT."
+          },
+          "lifestyle": {
+            "score": 8,
+            "weather_rating": 9,
+            "safety_rating": 8,
+            "coworking_spaces": 40,
+            "bachata_scene": "moderate",
+            "expat_community": "medium",
+            "confidence": "HIGH",
+            "notes": "Beach city, great weather, food scene, less touristy than Barcelona."
+          }
+        },
+        "overall_score": 65.2
+      },
+      {
+        "city": "M\u00e1laga",
+        "country": "Spain",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 2000,
+            "rent_1br": 1150,
+            "living_costs": 850,
+            "confidence": "HIGH",
+            "sources": [
+              "Numbeo"
+            ],
+            "notes": "Slightly cheaper than Valencia."
+          },
+          "dating_pool": {
+            "proxy_score": 70,
+            "census_data": 65,
+            "university_students": 40000,
+            "expat_community": "medium",
+            "nightlife_rating": 7,
+            "confidence": "MEDIUM",
+            "methodology": "65k single women 25-35 + 40k students + digital nomad hub"
+          },
+          "tax": {
+            "effective_rate": 24,
+            "beckham_eligible": true,
+            "special_regime": "Beckham Law - flat 24% for 6 years",
+            "net_from_gross": {
+              "150k": 114000,
+              "180k": 136800,
+              "200k": 152000
+            },
+            "confidence": "HIGH",
+            "notes": "Same Beckham Law as Barcelona."
+          },
+          "flights": {
+            "hub_connectivity": 8,
+            "direct_routes": 85,
+            "avg_cost_to_warsaw": 150,
+            "frequency_per_week": 18,
+            "confidence": "HIGH",
+            "notes": "M\u00e1laga (AGP) to Warsaw (WAW): 2-3 daily flights, \u20ac100-200 RT."
+          },
+          "lifestyle": {
+            "score": 8,
+            "weather_rating": 9,
+            "safety_rating": 8,
+            "coworking_spaces": 30,
+            "bachata_scene": "moderate",
+            "expat_community": "medium",
+            "confidence": "HIGH",
+            "notes": "Beach, digital nomad hub, great weather, laid-back vibe."
+          }
+        },
+        "overall_score": 65.9
+      },
+      {
+        "city": "Split",
+        "country": "Croatia",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 1800,
+            "rent_1br": 1000,
+            "living_costs": 800,
+            "confidence": "MEDIUM",
+            "sources": [
+              "Numbeo"
+            ],
+            "notes": "Cheaper than Spain/Portugal. Summer tourist prices spike."
+          },
+          "dating_pool": {
+            "proxy_score": 55,
+            "census_data": 18,
+            "university_students": 15000,
+            "expat_community": "small",
+            "nightlife_rating": 6,
+            "confidence": "LOW",
+            "methodology": "Small city (180k population), seasonal tourism, limited data"
+          },
+          "tax": {
+            "effective_rate": 30,
+            "beckham_eligible": false,
+            "special_regime": "None",
+            "net_from_gross": {
+              "150k": 105000,
+              "180k": 126000,
+              "200k": 140000
+            },
+            "confidence": "MEDIUM",
+            "notes": "Progressive 24-36%. No special regimes for remote workers."
+          },
+          "flights": {
+            "hub_connectivity": 5,
+            "direct_routes": 30,
+            "avg_cost_to_warsaw": 180,
+            "frequency_per_week": 7,
+            "confidence": "MEDIUM",
+            "notes": "Split (SPU) to Warsaw (WAW): 1 daily flight, \u20ac120-220 RT."
+          },
+          "lifestyle": {
+            "score": 7,
+            "weather_rating": 8,
+            "safety_rating": 8,
+            "coworking_spaces": 10,
+            "bachata_scene": "weak",
+            "expat_community": "small",
+            "confidence": "MEDIUM",
+            "notes": "Beautiful coast, summer tourist crowds, limited winter scene."
+          }
+        },
+        "overall_score": 57.2
+      },
+      {
+        "city": "Athens",
+        "country": "Greece",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 1700,
+            "rent_1br": 950,
+            "living_costs": 750,
+            "confidence": "MEDIUM",
+            "sources": [
+              "Numbeo"
+            ],
+            "notes": "Cheapest Western EU capital."
+          },
+          "dating_pool": {
+            "proxy_score": 80,
+            "census_data": 120,
+            "university_students": 100000,
+            "expat_community": "medium",
+            "nightlife_rating": 8,
+            "confidence": "MEDIUM",
+            "methodology": "120k single women 25-35 + 100k students + growing expat community"
+          },
+          "tax": {
+            "effective_rate": 35,
+            "beckham_eligible": false,
+            "special_regime": "None",
+            "net_from_gross": {
+              "150k": 97500,
+              "180k": 117000,
+              "200k": 130000
+            },
+            "confidence": "MEDIUM",
+            "notes": "Progressive 9-44%. No special tax regimes for remote workers."
+          },
+          "flights": {
+            "hub_connectivity": 8,
+            "direct_routes": 100,
+            "avg_cost_to_warsaw": 130,
+            "frequency_per_week": 25,
+            "confidence": "HIGH",
+            "notes": "Athens (ATH) to Warsaw (WAW): 3-4 daily flights, \u20ac80-160 RT."
+          },
+          "lifestyle": {
+            "score": 7,
+            "weather_rating": 9,
+            "safety_rating": 6,
+            "coworking_spaces": 25,
+            "bachata_scene": "moderate",
+            "expat_community": "medium",
+            "confidence": "MEDIUM",
+            "notes": "History, food, nightlife. Economic uncertainty, pollution."
+          }
+        },
+        "overall_score": 68.0
+      },
+      {
+        "city": "Tallinn",
+        "country": "Estonia",
+        "dimensions": {
+          "cost_of_living": {
+            "monthly_total": 1900,
+            "rent_1br": 1100,
+            "living_costs": 800,
+            "confidence": "MEDIUM",
+            "sources": [
+              "Numbeo"
+            ],
+            "notes": "Similar to Canary Islands, cheaper than Spain/Portugal."
+          },
+          "dating_pool": {
+            "proxy_score": 65,
+            "census_data": 35,
+            "university_students": 25000,
+            "expat_community": "small",
+            "nightlife_rating": 7,
+            "confidence": "LOW",
+            "methodology": "Small capital (450k), high gender ratio favoring men, strong tech scene"
+          },
+          "tax": {
+            "effective_rate": 20,
+            "beckham_eligible": false,
+            "special_regime": "Flat 20% income tax, e-Residency benefits",
+            "net_from_gross": {
+              "150k": 120000,
+              "180k": 144000,
+              "200k": 160000
+            },
+            "confidence": "HIGH",
+            "notes": "Estonia: flat 20% income tax. Lowest tax burden on list."
+          },
+          "flights": {
+            "hub_connectivity": 6,
+            "direct_routes": 45,
+            "avg_cost_to_warsaw": 100,
+            "frequency_per_week": 21,
+            "confidence": "HIGH",
+            "notes": "Tallinn (TLL) to Warsaw (WAW): 3 daily flights, \u20ac60-120 RT."
+          },
+          "lifestyle": {
+            "score": 6,
+            "weather_rating": 4,
+            "safety_rating": 9,
+            "coworking_spaces": 20,
+            "bachata_scene": "weak",
+            "expat_community": "small",
+            "confidence": "MEDIUM",
+            "notes": "Tech hub, safe, digital infrastructure. Harsh winters, limited social scene."
+          }
+        },
+        "overall_score": 61.2
+      }
+    ],
+    "comparison": {
+      "ranked_by_cost": [
+        "Athens",
+        "Split",
+        "Canary Islands",
+        "Tallinn",
+        "M\u00e1laga",
+        "Valencia",
+        "Lisbon",
+        "Barcelona"
+      ],
+      "ranked_by_dating": [
+        "Barcelona",
+        "Lisbon",
+        "Athens",
+        "Valencia",
+        "M\u00e1laga",
+        "Tallinn",
+        "Canary Islands",
+        "Split"
+      ],
+      "ranked_by_lifestyle": [
+        "Barcelona",
+        "Lisbon",
+        "Canary Islands",
+        "Valencia",
+        "M\u00e1laga",
+        "Split",
+        "Athens",
+        "Tallinn"
+      ],
+      "ranked_by_overall": [
+        "Athens",
+        "Barcelona",
+        "M\u00e1laga",
+        "Lisbon",
+        "Valencia",
+        "Canary Islands",
+        "Tallinn",
+        "Split"
+      ]
+    },
+    "recommendations": {
+      "top_pick": "Athens",
+      "runner_ups": [
+        "Barcelona",
+        "M\u00e1laga"
+      ],
+      "notes": "Top pick: Athens (score 68.0). Runner-ups: Barcelona, M\u00e1laga. Scoring weights: cost=0.2, dating=0.25, tax=0.2, flights=0.15, lifestyle=0.2.",
+      "scenario_model_available": true
+    }
+  }
+}
