@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/RelocationReportPublished.v1.json",
+  "title": "RelocationReportPublished",
+  "description": "Published by RELOC with relocation analysis",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "RELOC"},
+    "data": {
+      "type": "object",
+      "required": ["reportId", "location", "score"],
+      "properties": {
+        "reportId": {"type": "string"},
+        "location": {"type": "string"},
+        "score": {"type": "number", "minimum": 0, "maximum": 100},
+        "factors": {
+          "type": "object",
+          "properties": {
+            "costOfLiving": {"type": "number"},
+            "datingScene": {"type": "number"},
+            "weatherQuality": {"type": "number"},
+            "remoteFriendly": {"type": "number"}
+          }
+        }
+      }
+    }
+  }
+}

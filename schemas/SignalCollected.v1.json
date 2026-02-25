@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/SignalCollected.v1.json",
+  "title": "SignalCollected",
+  "description": "Published by DATE when dating/fitness signals are gathered",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "DATE"},
+    "data": {
+      "type": "object",
+      "required": ["signalType", "value"],
+      "properties": {
+        "signalType": {
+          "type": "string",
+          "enum": ["MATCH", "MESSAGE", "DATE", "WORKOUT", "WEIGHT", "MOOD"]
+        },
+        "value": {"type": "object"},
+        "collectedAt": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://life-systems.local/schemas/DraftGenerated.v1.json",
+  "title": "DraftGenerated",
+  "description": "Published by APPL when an application draft is created",
+  "type": "object",
+  "required": ["eventId", "timestamp", "version", "source", "data"],
+  "properties": {
+    "eventId": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "const": "v1"},
+    "source": {"type": "string", "const": "APPL"},
+    "data": {
+      "type": "object",
+      "required": ["draftId", "opportunityId", "generatedAt", "content"],
+      "properties": {
+        "draftId": {"type": "string"},
+        "opportunityId": {"type": "string"},
+        "generatedAt": {"type": "string", "format": "date-time"},
+        "content": {
+          "type": "object",
+          "properties": {
+            "coverLetter": {"type": "string"},
+            "customizedCV": {"type": "string", "format": "uri"},
+            "application Form": {"type": "object"}
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "AI confidence in draft quality (0-1)"
+        }
+      }
+    }
+  }
+}
