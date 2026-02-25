@@ -1,0 +1,18 @@
+[Unit]
+Description=Life Systems API
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/.openclaw/workspace/life-systems
+Environment="PATH=/home/ubuntu/.pyenv/shims:/usr/local/bin:/usr/bin:/bin"
+Environment="DB_PATH=/var/lib/life-systems/life.db"
+Environment="PORT=8000"
+EnvironmentFile=/etc/life-systems/env
+ExecStart=/home/ubuntu/.pyenv/shims/python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=Life Systems Job Scanner Timer
+Requires=life-systems-scanner.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=4h
+Unit=life-systems-scanner.service
+
+[Install]
+WantedBy=timers.target

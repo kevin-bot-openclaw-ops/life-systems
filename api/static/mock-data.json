@@ -1,0 +1,229 @@
+{
+  "event_type": "StateUpdated",
+  "version": "v1",
+  "timestamp": "2026-02-21T00:30:00Z",
+  "context": "SYNTH",
+  "payload": {
+    "sections": {
+      "career": {
+        "pipeline_summary": {
+          "discovered": 45,
+          "screened": 23,
+          "applied": 8,
+          "response": 3,
+          "interview": 1,
+          "offer": 0
+        },
+        "top_opportunities": [
+          {
+            "company": "Anthropic",
+            "role": "Senior ML Engineer",
+            "score": 92,
+            "location": "Remote (EU-friendly)",
+            "salary_range": "€160k-€200k",
+            "status": "applied",
+            "applied_date": "2026-02-18"
+          },
+          {
+            "company": "Mistral AI",
+            "role": "AI Platform Engineer",
+            "score": 89,
+            "location": "Paris / Remote",
+            "salary_range": "€150k-€180k",
+            "status": "draft_ready",
+            "discovered_date": "2026-02-20"
+          },
+          {
+            "company": "Featurespace",
+            "role": "Senior AI/ML Engineer (Fintech)",
+            "score": 87,
+            "location": "Remote UK/EU",
+            "salary_range": "€140k-€170k",
+            "status": "screening",
+            "discovered_date": "2026-02-19"
+          }
+        ],
+        "response_rate": 0.375,
+        "avg_response_time_days": 4.2,
+        "stale_applications": 2,
+        "next_action": "Follow up with Anthropic (6 days since application)"
+      },
+      "market": {
+        "top_skills": [
+          {"skill": "Python", "demand_count": 42, "trend": "stable"},
+          {"skill": "LLM Integration", "demand_count": 38, "trend": "up"},
+          {"skill": "RAG Pipelines", "demand_count": 31, "trend": "up"},
+          {"skill": "MLOps", "demand_count": 28, "trend": "stable"},
+          {"skill": "Kubernetes", "demand_count": 24, "trend": "stable"},
+          {"skill": "Banking Domain", "demand_count": 18, "trend": "stable"},
+          {"skill": "NLP", "demand_count": 16, "trend": "down"},
+          {"skill": "Computer Vision", "demand_count": 12, "trend": "stable"}
+        ],
+        "salary_ranges": {
+          "senior_ml_engineer": {"min": 120000, "max": 180000, "median": 150000, "currency": "EUR"},
+          "ml_platform_engineer": {"min": 130000, "max": 190000, "median": 160000, "currency": "EUR"},
+          "ai_architect": {"min": 150000, "max": 220000, "median": 185000, "currency": "EUR"}
+        },
+        "gap_analysis": {
+          "strong_skills": ["Python", "Banking Domain", "System Design", "MLOps"],
+          "gaps": ["Computer Vision", "Reinforcement Learning"],
+          "bridge_opportunities": ["LLM fine-tuning", "Agent Systems"]
+        },
+        "weekly_summary": "Market demand for LLM integration skills continues to rise (+12% week-over-week). Your banking + AI bridge is less common (18 listings mention fintech domain knowledge). Focus on roles emphasizing production ML over research."
+      },
+      "dating": {
+        "weekly_hours": 8.5,
+        "target_hours": 10,
+        "activity_breakdown": {
+          "bachata": 4,
+          "dating_apps": 2,
+          "social_events": 1.5,
+          "gym": 1
+        },
+        "streaks": {
+          "gym_consecutive_days": 3,
+          "social_events_per_week": 2
+        },
+        "upcoming_events": [
+          {
+            "title": "Thursday Meetup - Remote Work Community",
+            "date": "2026-02-27",
+            "time": "20:00",
+            "location": "D'Vales Bay, Corralejo",
+            "type": "networking",
+            "cost": "Free"
+          },
+          {
+            "title": "Dale Ritmo Bachata Social",
+            "date": "2026-02-28",
+            "time": "21:00",
+            "location": "TBD (check Instagram @daleritmoftv)",
+            "type": "dance",
+            "cost": "€10-15"
+          }
+        ],
+        "location_effectiveness": {
+          "corralejo_score": 7.5,
+          "matches_per_week": 4.2,
+          "dates_per_month": 2.1,
+          "events_available": "Medium (bachata 2x/week, social meetups 1x/week)"
+        },
+        "reflection_prompt": "You've been consistent with bachata (2x/week). How are the conversations after class? Are you staying for socials or leaving early?"
+      },
+      "relocation": {
+        "current_city": "Corralejo, Fuerteventura",
+        "current_stay_end": "2026-04-04",
+        "city_rankings": [
+          {
+            "city": "Lisbon",
+            "overall_score": 8.7,
+            "cost_of_living_monthly": 2200,
+            "net_income_150k": 112500,
+            "dating_pool_proxy": 8.5,
+            "lifestyle_score": 9.0,
+            "flight_connectivity": 9.5,
+            "pros": "Large tech scene, active dating, great food, Beckham Law eligible",
+            "cons": "Getting crowded, tourist-heavy in summer"
+          },
+          {
+            "city": "Barcelona",
+            "overall_score": 8.5,
+            "cost_of_living_monthly": 2400,
+            "net_income_150k": 112500,
+            "dating_pool_proxy": 9.0,
+            "lifestyle_score": 9.5,
+            "flight_connectivity": 9.0,
+            "pros": "Beach + city, amazing food, large expat scene, Beckham Law",
+            "cons": "Expensive, tourist chaos, separatist politics"
+          },
+          {
+            "city": "Corralejo (current)",
+            "overall_score": 7.2,
+            "cost_of_living_monthly": 1800,
+            "net_income_150k": 127500,
+            "dating_pool_proxy": 5.0,
+            "lifestyle_score": 8.5,
+            "flight_connectivity": 6.0,
+            "pros": "Low cost, surf, chill vibe, year-round sun",
+            "cons": "Small dating pool, limited flights, isolated"
+          },
+          {
+            "city": "Berlin",
+            "overall_score": 7.8,
+            "cost_of_living_monthly": 2100,
+            "net_income_150k": 97000,
+            "dating_pool_proxy": 8.0,
+            "lifestyle_score": 8.0,
+            "flight_connectivity": 9.5,
+            "pros": "Tech hub, diverse, vibrant nightlife, affordable",
+            "cons": "Cold winters, bureaucracy, tax burden"
+          }
+        ],
+        "scenario_analysis": {
+          "150k_salary_lisbon": {
+            "gross": 150000,
+            "tax": 37500,
+            "net": 112500,
+            "col": 2200,
+            "disposable_monthly": 7183,
+            "lifestyle_affordability": "Comfortable (2BR apartment, travel 2x/month, social 3x/week)"
+          }
+        },
+        "recommendation": "Lisbon or Barcelona strong candidates for post-Fuerteventura. Both Beckham Law eligible (24% flat tax vs. 40%+). Larger dating pools, better flight connections for visiting Poland. Consider 1-month trial in Lisbon (March-April) before committing."
+      }
+    },
+    "conflicts": [
+      {
+        "conflict_type": "goal_conflict",
+        "advisors": ["CRST", "RELOC"],
+        "summary": "Career advisor recommends applying to Berlin-based role (strong match, €180k), but relocation advisor flags tax burden (€97k net vs. €112k net in Spain).",
+        "perspectives": [
+          {
+            "advisor": "CRST",
+            "recommendation": "Apply to Berlin role. Company fit (fintech AI) + salary premium outweigh tax difference. Can negotiate remote from Spain after probation.",
+            "confidence": 0.75
+          },
+          {
+            "advisor": "RELOC",
+            "recommendation": "Prioritize Spain-based roles. €15k/year net income difference compounds to €75k over 5 years. Quality of life in Lisbon/Barcelona > Berlin for your priorities.",
+            "confidence": 0.65
+          }
+        ]
+      }
+    ],
+    "alerts": [
+      {
+        "alert_type": "threshold_breach",
+        "severity": "warning",
+        "message": "Social hours below target for 2 consecutive weeks (8.5h vs. 10h target)",
+        "context_data": {
+          "current": 8.5,
+          "target": 10,
+          "deficit": 1.5,
+          "streak": 2
+        }
+      },
+      {
+        "alert_type": "trend_change",
+        "severity": "info",
+        "message": "Market demand for 'LLM Integration' spiked +12% this week. Consider highlighting this skill in upcoming applications.",
+        "context_data": {
+          "skill": "LLM Integration",
+          "previous_count": 34,
+          "current_count": 38,
+          "change_percent": 11.8
+        }
+      },
+      {
+        "alert_type": "threshold_breach",
+        "severity": "critical",
+        "message": "2 applications stale (>10 business days, no response). Send follow-up or mark dead.",
+        "context_data": {
+          "stale_count": 2,
+          "companies": ["José Corbera (PayZentric)", "Sam I (RAG Chatbot)"],
+          "days_since_application": [15, 15]
+        }
+      }
+    ]
+  }
+}
