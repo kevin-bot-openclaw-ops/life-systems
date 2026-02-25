@@ -5,12 +5,13 @@ After=network.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/.openclaw/workspace/life-systems
-Environment="PATH=/home/ubuntu/.pyenv/shims:/usr/local/bin:/usr/bin:/bin"
+WorkingDirectory=/opt/life-systems
+Environment="PATH=/opt/life-systems/venv/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="DB_PATH=/var/lib/life-systems/life.db"
 Environment="PORT=8000"
+Environment="PYTHONPATH=/opt/life-systems"
 EnvironmentFile=/etc/life-systems/env
-ExecStart=/home/ubuntu/.pyenv/shims/python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+ExecStart=/opt/life-systems/venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=10
 

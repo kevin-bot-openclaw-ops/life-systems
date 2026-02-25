@@ -12,9 +12,20 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
-# Step 1: Install Python dependencies
+# Step 1: Copy files to /opt/life-systems
+echo "📁 Copying files to /opt/life-systems..."
+sudo mkdir -p /opt/life-systems
+sudo rsync -av --exclude='.git' --exclude='venv' --exclude='__pycache__' --exclude='*.pyc' . /opt/life-systems/
+sudo chown -R ubuntu:ubuntu /opt/life-systems
+cd /opt/life-systems
+
+# Step 1.5: Create virtualenv and install dependencies
 echo "📦 Installing Python dependencies..."
-pip3 install -r requirements.txt
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+fi
+source venv/bin/activate
+pip install -r requirements.txt
 
 # Step 2: Initialize database
 echo "🗄️  Initializing database..."
@@ -32,12 +43,31 @@ if [ ! -f /etc/life-systems/env ]; then
     echo "⚠️  Edit /etc/life-systems/env with your credentials:"
     echo "    - ANTHROPIC_API_KEY"
     echo "    - LS_USER / LS_PASSWORD"
-    echo "    - CLOUDFLARE_TUNNEL_TOKEN"
+    echo "    - SLACK_BOT_TOKEN (optional)"
     echo ""
     read -p "Press Enter after editing /etc/life-systems/env..."
 else
     echo "✓ Environment file exists"
 fi
+
+# Step 3.5: Install Caddy
+echo "🌐 Installing/configuring Caddy..."
+if ! command -v caddy &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+    sudo apt-get update
+    sudo apt-get install -y caddy
+else
+    echo "✓ Caddy already installed"
+fi
+
+sudo mkdir -p /var/log/caddy
+sudo chown -R caddy:caddy /var/log/caddy
+sudo cp Caddyfile /etc/caddy/Caddyfile
+sudo systemctl enable caddy
+sudo systemctl restart caddy
 
 # Step 4: Install systemd services
 echo "⚙️  Installing systemd services..."
@@ -75,11 +105,12 @@ fi
 echo ""
 echo "=== Deployment Complete ==="
 echo ""
-echo "📊 Dashboard: http://localhost:8000"
-echo "📚 API Docs: http://localhost:8000/docs"
+echo "🌐 Service: https://life.plocha.eu"
+echo "📚 API Docs: https://life.plocha.eu/docs"
 echo "📝 Logs: sudo journalctl -u life-systems -f"
+echo "🔐 Credentials: jurek / LifeSystems2026!"
 echo ""
 echo "Next steps:"
-echo "1. Configure Cloudflare Tunnel (see README.md)"
-echo "2. Point life.plocha.eu DNS to tunnel"
-echo "3. Run first scan: sudo systemctl start life-systems-scanner"
+echo "1. Test: curl -u jurek:LifeSystems2026! https://life.plocha.eu/api/health"
+echo "2. Run first scan: sudo systemctl start life-systems-scanner"
+echo "3. Check scanner timer: systemctl list-timers | grep life-systems"
