@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Systems - DDD Architecture Board</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; }
+  .header { padding: 24px 32px; border-bottom: 1px solid #21262d; }
+  .header h1 { font-size: 22px; color: #f0f6fc; font-weight: 600; }
+  .header .subtitle { color: #8b949e; font-size: 14px; margin-top: 4px; }
+  .header .updated { color: #6e7681; font-size: 11px; margin-top: 4px; }
+  .stats { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+  .stat { text-align: center; background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 10px 16px; }
+  .stat-num { font-size: 20px; font-weight: 700; color: #58a6ff; }
+  .stat-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Overall Progress */
+  .progress-section { padding: 20px 32px; border-bottom: 1px solid #21262d; background: #0d1117; }
+  .progress-section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; }
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .progress-label { font-size: 12px; font-weight: 600; min-width: 140px; }
+  .progress-bar-wrap { flex: 1; height: 20px; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #21262d; position: relative; }
+  .progress-bar { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+  .progress-pct { font-size: 11px; font-weight: 600; min-width: 50px; text-align: right; }
+  .progress-detail { font-size: 10px; color: #6e7681; min-width: 80px; }
+  .bar-done { background: linear-gradient(90deg, #238636, #3fb950); }
+  .bar-partial { background: linear-gradient(90deg, #9e6a03, #d29922); }
+
+  /* Critical Path */
+  .critical-path { padding: 16px 32px; border-bottom: 1px solid #21262d; background: #1a1210; }
+  .critical-path h3 { font-size: 13px; color: #f97316; margin-bottom: 8px; }
+  .critical-path .path-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; }
+  .path-node { padding: 4px 10px; border-radius: 6px; font-weight: 600; font-family: 'SF Mono', monospace; font-size: 10px; }
+  .path-done { background: #0d2818; color: #3fb950; border: 1px solid #238636; text-decoration: line-through; opacity: 0.6; }
+  .path-current { background: #2d1f06; color: #fbbf24; border: 1px solid #d29922; animation: pulse 2s infinite; }
+  .path-pending { background: #161b22; color: #6e7681; border: 1px solid #21262d; }
+  .path-arrow { color: #30363d; font-size: 14px; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+  /* Context Map */
+  .context-map { padding: 24px 32px; border-bottom: 1px solid #21262d; background: #0d1117; }
+  .context-map h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; }
+  .ctx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; max-width: 900px; }
+  .ctx-card { border-radius: 8px; padding: 10px 14px; border: 1px solid; position: relative; }
+  .ctx-card .ctx-code { font-family: 'SF Mono', monospace; font-size: 12px; font-weight: 700; }
+  .ctx-card .ctx-name { font-size: 11px; color: #8b949e; margin-top: 2px; }
+  .ctx-card .ctx-type { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .ctx-card .ctx-status { font-size: 9px; margin-top: 4px; font-weight: 600; }
+  .ctx-core { border-color: #388bfd; background: #0d2240; }
+  .ctx-core .ctx-code { color: #58a6ff; }
+  .ctx-core .ctx-type { color: #58a6ff; }
+  .ctx-support { border-color: #a371f7; background: #1c1437; }
+  .ctx-support .ctx-code { color: #a78bfa; }
+  .ctx-support .ctx-type { color: #a78bfa; }
+  .ctx-generic { border-color: #3fb950; background: #0d2818; }
+  .ctx-generic .ctx-code { color: #3fb950; }
+  .ctx-generic .ctx-type { color: #3fb950; }
+  .ctx-kernel { border-color: #d29922; background: #2d2006; }
+  .ctx-kernel .ctx-code { color: #fbbf24; }
+  .ctx-kernel .ctx-type { color: #fbbf24; }
+
+  /* Event Flow */
+  .event-flow { padding: 24px 32px; border-bottom: 1px solid #21262d; }
+  .event-flow h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 12px; }
+  .flow-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .flow-table th { text-align: left; padding: 6px 10px; color: #8b949e; font-size: 10px; text-transform: uppercase; border-bottom: 1px solid #30363d; }
+  .flow-table td { padding: 6px 10px; border-bottom: 1px solid #21262d; }
+  .flow-table .mono { font-family: 'SF Mono', monospace; font-size: 10px; }
+  .flow-table .event-name { color: #d2a8ff; }
+  .flow-table .ctx-ref { font-weight: 600; }
+
+  /* Board */
+  .board { display: flex; gap: 0; overflow-x: auto; }
+  .milestone-col { min-width: 320px; flex: 1; border-right: 1px solid #21262d; }
+  .milestone-col:last-child { border-right: none; }
+  .milestone-header { padding: 16px 20px; border-bottom: 1px solid #21262d; }
+  .milestone-header h2 { font-size: 15px; font-weight: 600; }
+  .milestone-header .desc { font-size: 12px; color: #8b949e; margin-top: 4px; }
+  .milestone-header .badges { margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+  .badge-eta { background: #161b22; color: #8b949e; }
+  .badge-effort { background: #1c2d3a; color: #58a6ff; }
+  .badge-risk { background: #143d1a; color: #3fb950; }
+  .badge-done { background: #0d2818; color: #3fb950; border: 1px solid #238636; }
+  .badge-progress { background: #2d1f06; color: #fbbf24; border: 1px solid #9e6a03; }
+  .badge-blocked { background: #3d1414; color: #f85149; border: 1px solid #da3633; }
+  .mvp-h { background: linear-gradient(135deg, #1a1f2e, #161b22); }
+  .mvp-h h2 { color: #f97316; }
+  .m1-h { background: linear-gradient(135deg, #1a1f2e, #161b22); }
+  .m1-h h2 { color: #a78bfa; }
+  .m2-h { background: linear-gradient(135deg, #1a1f2e, #161b22); }
+  .m2-h h2 { color: #34d399; }
+  .m3-h { background: linear-gradient(135deg, #1a1f2e, #161b22); }
+  .m3-h h2 { color: #8b949e; }
+
+  .milestone-body { padding: 12px; }
+  .ctx-section { margin-bottom: 14px; }
+  .ctx-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+
+  .task-card { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 12px; margin-bottom: 6px; position: relative; }
+  .task-card:hover { border-color: #388bfd44; }
+  .task-card.done { border-left: 3px solid #3fb950; opacity: 0.75; }
+  .task-card.done .task-title { text-decoration: line-through; color: #8b949e; }
+  .task-card.in-progress { border-left: 3px solid #d29922; }
+  .task-card.pending { border-left: 3px solid #30363d; }
+  .task-id { font-size: 10px; font-weight: 600; color: #8b949e; font-family: 'SF Mono', monospace; }
+  .task-title { font-size: 12px; font-weight: 500; color: #f0f6fc; margin-top: 3px; }
+  .task-meta { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+  .tag { font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: 500; }
+  .tag-p0 { background: #5c1a1a; color: #ef4444; }
+  .tag-p1 { background: #4a1d1d; color: #f97316; }
+  .tag-p2 { background: #1c2d3a; color: #58a6ff; }
+  .tag-p3 { background: #1c2d1c; color: #8b949e; }
+  .tag-effort { background: #1c1c2e; color: #79c0ff; font-family: 'SF Mono', monospace; }
+  .tag-risk-med { background: #3d2e14; color: #d29922; }
+  .tag-risk-low { background: #143d1a; color: #3fb950; }
+  .tag-dep { background: #21262d; color: #8b949e; font-style: italic; font-size: 9px; }
+  .tag-acl { background: #2d1f4e; color: #d2a8ff; }
+  .tag-event { background: #1c3a2e; color: #7ee787; font-family: 'SF Mono', monospace; }
+  .tag-done { background: #0d2818; color: #3fb950; font-weight: 700; }
+  .tag-in-progress { background: #2d1f06; color: #fbbf24; font-weight: 700; }
+  .tag-pending-s { background: #21262d; color: #6e7681; }
+  .task-pub { font-size: 9px; color: #7ee787; margin-top: 4px; font-family: 'SF Mono', monospace; }
+  .task-val { font-size: 10px; color: #8b949e; margin-top: 5px; border-top: 1px solid #21262d; padding-top: 5px; }
+  .task-val strong { color: #c9d1d9; }
+  .task-completed { font-size: 9px; color: #3fb950; margin-top: 3px; font-family: 'SF Mono', monospace; }
+
+  .spike-card { background: #1a1712; border: 1px solid #4a3520; border-radius: 8px; padding: 12px; margin-bottom: 6px; border-left: 3px solid #fbbf24; }
+  .spike-card:hover { border-color: #fbbf2466; }
+  .spike-card.done { border-left: 3px solid #3fb950; opacity: 0.75; background: #121712; }
+  .spike-card.done .task-title { text-decoration: line-through; color: #8b949e; }
+
+  .arrow { text-align: center; color: #30363d; font-size: 14px; margin: 1px 0; }
+
+  /* Milestone value box */
+  .mv { background: #0d1117; border: 1px dashed #30363d; border-radius: 8px; padding: 10px; margin: 10px 0; }
+  .mv h4 { font-size: 11px; color: #f0f6fc; margin-bottom: 3px; }
+  .mv p { font-size: 10px; color: #8b949e; line-height: 1.4; }
+
+  /* Colors per context */
+  .c-shared { background: #2d2006; color: #fbbf24; }
+  .c-disc { background: #1c3a5e; color: #58a6ff; }
+  .c-appl { background: #0d3a5e; color: #79c0ff; }
+  .c-mktl { background: #2d1f4e; color: #a78bfa; }
+  .c-crst { background: #3a1f3e; color: #d2a8ff; }
+  .c-date { background: #3a0d2e; color: #f778ba; }
+  .c-reloc { background: #1a2d1a; color: #56d364; }
+  .c-synth { background: #0d2818; color: #3fb950; }
+  .c-dash { background: #1c2d3a; color: #58a6ff; }
+  .c-learn { background: #2d2a1f; color: #d29922; }
+
+  /* Legacy section */
+  .legacy-section { padding: 24px 32px; border-top: 1px solid #21262d; }
+  .legacy-section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; }
+  .legacy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .legacy-group { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 14px; }
+  .legacy-group h3 { font-size: 12px; color: #f0f6fc; margin-bottom: 8px; }
+  .legacy-task { font-size: 11px; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
+  .legacy-task .lt-id { font-family: 'SF Mono', monospace; font-size: 10px; color: #6e7681; min-width: 65px; }
+  .legacy-task .lt-name { flex: 1; }
+  .legacy-task.lt-done { color: #3fb950; }
+  .legacy-task.lt-done .lt-name { text-decoration: line-through; opacity: 0.7; }
+  .legacy-task.lt-pending { color: #8b949e; }
+  .legacy-task.lt-in-progress { color: #fbbf24; }
+  .lt-icon { font-size: 12px; }
+
+  .legend { padding: 16px 32px; border-top: 1px solid #21262d; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .legend-title { font-size: 11px; font-weight: 600; color: #8b949e; text-transform: uppercase; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #8b949e; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  @media (max-width: 768px) {
+    .board { flex-direction: column; }
+    .milestone-col { min-width: 100%; border-right: none; border-bottom: 1px solid #21262d; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Life Systems Roadmap v2: DDD Architecture</h1>
+  <div class="subtitle">9 Bounded Contexts + Shared Kernel / 20 DDD Tasks + 30 Legacy Tasks / 166-235h</div>
+  <div class="updated">Last synced: 2026-02-25 / Source: BACKLOG.md @ JerzyPlocha/kevin-backlog</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" style="color:#3fb950">33</div><div class="stat-label">Done</div></div>
+    <div class="stat"><div class="stat-num" style="color:#fbbf24">1</div><div class="stat-label">In Progress</div></div>
+    <div class="stat"><div class="stat-num" style="color:#6e7681">16</div><div class="stat-label">Pending</div></div>
+    <div class="stat"><div class="stat-num" style="color:#58a6ff">66%</div><div class="stat-label">Complete</div></div>
+    <div class="stat"><div class="stat-num" style="color:#3fb950">0</div><div class="stat-label">Blocked</div></div>
+  </div>
+</div>
+
+<!-- Progress Section -->
+<div class="progress-section">
+  <h2>Milestone Progress</h2>
+
+  <div class="progress-row">
+    <div class="progress-label" style="color:#f97316">Spikes</div>
+    <div class="progress-bar-wrap"><div class="progress-bar bar-done" style="width:80%"></div></div>
+    <div class="progress-pct" style="color:#3fb950">4/5</div>
+    <div class="progress-detail">DATE-SPIKE-1 left</div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-label" style="color:#f97316">MVP</div>
+    <div class="progress-bar-wrap"><div class="progress-bar bar-done" style="width:100%"></div></div>
+    <div class="progress-pct" style="color:#3fb950">4/4</div>
+    <div class="progress-detail">COMPLETE</div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-label" style="color:#a78bfa">M1: Assisted Apps</div>
+    <div class="progress-bar-wrap"><div class="progress-bar bar-done" style="width:100%"></div></div>
+    <div class="progress-pct" style="color:#3fb950">2/2</div>
+    <div class="progress-detail">COMPLETE</div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-label" style="color:#34d399">M2: Full Dashboard</div>
+    <div class="progress-bar-wrap"><div class="progress-bar bar-partial" style="width:29%"></div></div>
+    <div class="progress-pct" style="color:#d29922">2/7</div>
+    <div class="progress-detail">Blocked on DATE</div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-label" style="color:#8b949e">M3: Self-Improving</div>
+    <div class="progress-bar-wrap"><div class="progress-bar bar-partial" style="width:0%"></div></div>
+    <div class="progress-pct" style="color:#6e7681">0/2</div>
+    <div class="progress-detail">Not started</div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-label" style="color:#8b949e">Legacy Tasks</div>
+    <div class="progress-bar-wrap"><div class="progress-bar bar-done" style="width:70%"></div></div>
+    <div class="progress-pct" style="color:#3fb950">21/30</div>
+    <div class="progress-detail">8 pending, 1 WIP</div>
+  </div>
+</div>
+
+<!-- Critical Path -->
+<div class="critical-path">
+  <h3>Critical Path to M2 Completion</h3>
+  <div class="path-flow">
+    <span class="path-node path-done">SHARED-MVP-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">DISC-SPIKE-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">DISC-MVP-1/2</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">MKTL-MVP-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">APPL-M1-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">APPL-M2-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">CRST-M1-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-done">RELOC-M2-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-current">DATE-SPIKE-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-pending">DATE-M2-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-pending">DATE-M2-2</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-pending">SYNTH-M2-1</span>
+    <span class="path-arrow">&rarr;</span>
+    <span class="path-node path-pending">DASH-M2-1/2</span>
+  </div>
+</div>
+
+<!-- Context Map -->
+<div class="context-map">
+  <h2>Bounded Context Map</h2>
+  <div class="ctx-grid">
+    <div class="ctx-card ctx-kernel"><div class="ctx-code">SHARED</div><div class="ctx-name">Contracts + Events</div><div class="ctx-type">Shared Kernel</div><div class="ctx-status" style="color:#3fb950">DONE</div></div>
+    <div class="ctx-card ctx-core"><div class="ctx-code">DISC</div><div class="ctx-name">Discovery</div><div class="ctx-type">Core Domain</div><div class="ctx-status" style="color:#3fb950">DONE (Spike+MVP)</div></div>
+    <div class="ctx-card ctx-core"><div class="ctx-code">APPL</div><div class="ctx-name">Application</div><div class="ctx-type">Core Domain</div><div class="ctx-status" style="color:#3fb950">DONE (thru M2)</div></div>
+    <div class="ctx-card ctx-support"><div class="ctx-code">MKTL</div><div class="ctx-name">Market Intel</div><div class="ctx-type">Supporting</div><div class="ctx-status" style="color:#3fb950">DONE</div></div>
+    <div class="ctx-card ctx-support"><div class="ctx-code">CRST</div><div class="ctx-name">Career Strategy</div><div class="ctx-type">Supporting</div><div class="ctx-status" style="color:#3fb950">DONE</div></div>
+    <div class="ctx-card ctx-support"><div class="ctx-code">DATE</div><div class="ctx-name">Dating &amp; Social</div><div class="ctx-type">Supporting</div><div class="ctx-status" style="color:#f97316">SPIKE PENDING</div></div>
+    <div class="ctx-card ctx-support"><div class="ctx-code">RELOC</div><div class="ctx-name">Relocation</div><div class="ctx-type">Supporting</div><div class="ctx-status" style="color:#3fb950">DONE</div></div>
+    <div class="ctx-card ctx-generic"><div class="ctx-code">SYNTH</div><div class="ctx-name">Synthesis</div><div class="ctx-type">Generic Subdomain</div><div class="ctx-status" style="color:#6e7681">BLOCKED (DATE)</div></div>
+    <div class="ctx-card ctx-generic"><div class="ctx-code">DASH</div><div class="ctx-name">Presentation</div><div class="ctx-type">Generic Subdomain</div><div class="ctx-status" style="color:#6e7681">BLOCKED (SYNTH)</div></div>
+    <div class="ctx-card ctx-generic"><div class="ctx-code">LEARN</div><div class="ctx-name">Preference Learning</div><div class="ctx-type">Generic Subdomain</div><div class="ctx-status" style="color:#6e7681">M3 (not started)</div></div>
+  </div>
+</div>
+
+<!-- Event Flow -->
+<div class="event-flow">
+  <h2>Published Language (Domain Events)</h2>
+  <table class="flow-table">
+    <tr><th>Publisher</th><th>Event</th><th>Consumers</th><th>ACL</th></tr>
+    <tr><td class="ctx-ref" style="color:#58a6ff">DISC</td><td class="mono event-name">OpportunityDiscovered</td><td>APPL, MKTL</td><td class="mono">OpportunityQualifier</td></tr>
+    <tr><td class="ctx-ref" style="color:#58a6ff">DISC</td><td class="mono event-name">OpportunityScored</td><td>APPL (top-N)</td><td class="mono">OpportunityQualifier</td></tr>
+    <tr><td class="ctx-ref" style="color:#79c0ff">APPL</td><td class="mono event-name">DraftGenerated</td><td>CRST</td><td>--</td></tr>
+    <tr><td class="ctx-ref" style="color:#79c0ff">APPL</td><td class="mono event-name">DecisionMade</td><td>CRST, LEARN</td><td>--</td></tr>
+    <tr><td class="ctx-ref" style="color:#a78bfa">MKTL</td><td class="mono event-name">MarketReportPublished</td><td>SYNTH</td><td class="mono">AdvisorAdapter</td></tr>
+    <tr><td class="ctx-ref" style="color:#d2a8ff">CRST</td><td class="mono event-name">StrategyReportPublished</td><td>SYNTH</td><td class="mono">AdvisorAdapter</td></tr>
+    <tr><td class="ctx-ref" style="color:#f778ba">DATE</td><td class="mono event-name">DatingReportPublished</td><td>SYNTH</td><td class="mono">AdvisorAdapter</td></tr>
+    <tr><td class="ctx-ref" style="color:#56d364">RELOC</td><td class="mono event-name">RelocationReportPublished</td><td>SYNTH</td><td class="mono">AdvisorAdapter</td></tr>
+    <tr><td class="ctx-ref" style="color:#3fb950">SYNTH</td><td class="mono event-name">StateUpdated</td><td>DASH</td><td class="mono">ViewModelMapper</td></tr>
+    <tr><td class="ctx-ref" style="color:#d29922">LEARN</td><td class="mono event-name">WeightsAdjusted</td><td>DISC, advisors</td><td>--</td></tr>
+  </table>
+</div>
+
+<!-- Board -->
+<div class="board">
+
+  <!-- SPIKE + MVP Column -->
+  <div class="milestone-col">
+    <div class="milestone-header mvp-h">
+      <h2>Spikes + MVP</h2>
+      <div class="desc">Validate assumptions. Build core discovery pipeline + architecture.</div>
+      <div class="badges">
+        <span class="badge badge-eta">Week 1-2</span>
+        <span class="badge badge-effort">64-92h</span>
+        <span class="badge badge-done">8/9 DONE</span>
+      </div>
+    </div>
+    <div class="milestone-body">
+      <div class="mv"><h4>Value Unlocked</h4><p>Go/no-go on all risky paths. Daily ranked job feed. Skill demand data. Architecture unblocks everything.</p></div>
+
+      <!-- SHARED -->
+      <div class="ctx-section">
+        <span class="ctx-label c-shared">SHARED Kernel</span>
+        <div class="task-card done">
+          <div class="task-id">SHARED-MVP-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Architecture + Data Contracts + Event Schema</div>
+          <div class="task-completed">Completed: 2026-02-20 / 21 files, 1,905 lines</div>
+          <div class="task-meta">
+            <span class="tag tag-p0">P0</span>
+            <span class="tag tag-effort">10-15h</span>
+            <span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: JSON schemas for all domain events</div>
+          <div class="task-val"><strong>Unblocks:</strong> Every context. Defines typed contracts + isolation rules + ACL interfaces.</div>
+        </div>
+      </div>
+
+      <!-- Spikes -->
+      <div class="ctx-section">
+        <span class="ctx-label" style="background:#3a2a10;color:#fbbf24;">SPIKES (4/5 done)</span>
+
+        <div class="spike-card done">
+          <div class="task-id">DISC-SPIKE-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Job Board API &amp; Scraping Recon</div>
+          <div class="task-meta">
+            <span class="tag tag-p0">P0</span><span class="tag tag-effort">6-8h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-val"><strong>De-risks:</strong> DISC-MVP-1. Tests 13 boards. Output: feasibility matrix.</div>
+        </div>
+
+        <div class="spike-card done">
+          <div class="task-id">APPL-SPIKE-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Humanizer Rules Research</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">4-6h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-val"><strong>De-risks:</strong> APPL-M1-1. Output: AI-tell ruleset + Jurek's voice fingerprint.</div>
+        </div>
+
+        <div class="spike-card pending">
+          <div class="task-id">DATE-SPIKE-1 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Dating &amp; Fitness Data Pilot</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">6-8h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-val"><strong>De-risks:</strong> DATE-M2-1/M2-2. 2-week pilot: 3 logging methods. Output: winning method + Apple Health proof.<br><strong style="color:#f97316">CRITICAL PATH: blocks all of M2 completion.</strong></div>
+        </div>
+
+        <div class="spike-card done">
+          <div class="task-id">RELOC-SPIKE-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Relocation Data Validation</div>
+          <div class="task-completed">Completed: 2026-02-20</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">4-6h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-val"><strong>De-risks:</strong> RELOC-M2-1. Output: confidence matrix for 8 cities.</div>
+        </div>
+
+        <div class="spike-card done">
+          <div class="task-id">DASH-SPIKE-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Dashboard Shell (Mock Data)</div>
+          <div class="task-completed">Completed: 2026-02-21</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">6-8h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">after SHARED-MVP-1</span>
+          </div>
+          <div class="task-val"><strong>De-risks:</strong> DASH-M2-1/M2-2. Full UI with mock data. Advisors plug in later.</div>
+        </div>
+      </div>
+
+      <!-- DISC Core -->
+      <div class="ctx-section">
+        <span class="ctx-label c-disc">DISC: Discovery</span>
+        <div class="task-card done">
+          <div class="task-id">DISC-MVP-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Multi-Source Job Scanner</div>
+          <div class="task-completed">Completed: 2026-02-21</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">10-15h</span><span class="tag tag-risk-med">MED</span>
+          </div>
+          <div class="task-pub">publishes: OpportunityDiscovered</div>
+          <div class="task-val"><strong>Delivers:</strong> 8+ boards, structured JSON, dedup. Builds only on spike-validated boards.</div>
+        </div>
+        <div class="arrow">|</div>
+        <div class="task-card done">
+          <div class="task-id">DISC-MVP-2 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Job Scoring Engine</div>
+          <div class="task-completed">Completed: 2026-02-23</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">8-12h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: OpportunityScored</div>
+          <div class="task-val"><strong>Delivers:</strong> Score 0-100, hard filters, configurable weights. Pure logic, no external deps.</div>
+        </div>
+      </div>
+
+      <!-- MKTL -->
+      <div class="ctx-section">
+        <span class="ctx-label c-mktl">MKTL: Market Intelligence</span>
+        <div class="task-card done">
+          <div class="task-id">MKTL-MVP-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Market Analyst</div>
+          <div class="task-completed">Completed: 2026-02-22</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">10-14h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: MarketReportPublished</div>
+          <div class="task-val"><strong>Delivers:</strong> Weekly skill demand + salary trends + gap analysis. Consumes OpportunityDiscovered events.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M1 Column -->
+  <div class="milestone-col">
+    <div class="milestone-header m1-h">
+      <h2>M1: Assisted Applications</h2>
+      <div class="desc">System drafts applications. You review and send.</div>
+      <div class="badges">
+        <span class="badge badge-eta">Week 3-4</span>
+        <span class="badge badge-effort">12-18h</span>
+        <span class="badge badge-done">COMPLETE</span>
+      </div>
+    </div>
+    <div class="milestone-body">
+      <div class="mv"><h4>Value Unlocked</h4><p>3x application throughput. Humanizer baked in from spike. 20-30 min saved per application.</p></div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-appl">APPL: Application Pipeline</span>
+        <div class="task-card done">
+          <div class="task-id">APPL-M1-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Application Draft Generator</div>
+          <div class="task-completed">Completed: 2026-02-21</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">12-18h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: DraftGenerated</div>
+          <div class="task-meta" style="margin-top:4px">
+            <span class="tag tag-acl">ACL: OpportunityQualifier</span>
+          </div>
+          <div class="task-val"><strong>Delivers:</strong> Role-specific cover letters. Consumes ApplicationCandidate (from ACL, not raw listings). Humanizer validated by spike.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M2 Column -->
+  <div class="milestone-col">
+    <div class="milestone-header m2-h">
+      <h2>M2: Full Life Dashboard</h2>
+      <div class="desc">All advisors active. Unified dashboard. iPhone widget. Human-in-the-loop gates.</div>
+      <div class="badges">
+        <span class="badge badge-eta">Week 5-8</span>
+        <span class="badge badge-effort">72-98h</span>
+        <span class="badge badge-progress">2/7 DONE</span>
+      </div>
+    </div>
+    <div class="milestone-body">
+      <div class="mv"><h4>Value Unlocked</h4><p>One screen for entire life. Approval queue = 5 min/day human gate. All advisor data pre-validated by spikes.</p></div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-appl">APPL: Application Pipeline</span>
+        <div class="task-card done">
+          <div class="task-id">APPL-M2-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Approval Queue</div>
+          <div class="task-completed">Completed: 2026-02-22</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">12-16h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: DecisionMade</div>
+          <div class="task-val"><strong>Human gate:</strong> Daily top-10 digest. Approve/reject/defer. Feeds CRST (funnel) + LEARN (weights).</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-crst">CRST: Career Strategy</span>
+        <div class="task-card done">
+          <div class="task-id">CRST-M2-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Career Strategist</div>
+          <div class="task-completed">Completed: 2026-02-22</div>
+          <div class="task-meta">
+            <span class="tag tag-p1">P1</span><span class="tag tag-effort">12-16h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: StrategyReportPublished</div>
+          <div class="task-val"><strong>Delivers:</strong> Funnel by channel. Pivot alerts. Consumes DecisionMade + DraftGenerated events.</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-date">DATE: Dating &amp; Social</span>
+        <div class="task-card pending">
+          <div class="task-id">DATE-M2-1 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Signal Collector</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">8-10h</span><span class="tag tag-risk-med">MED</span>
+            <span class="tag tag-dep">after DATE-SPIKE-1</span>
+          </div>
+          <div class="task-pub">publishes: SignalCollected (internal)</div>
+          <div class="task-meta" style="margin-top:4px">
+            <span class="tag tag-acl">ACL: SignalNormalizer</span>
+          </div>
+          <div class="task-val"><strong>Delivers:</strong> Productionized winning logging method. Normalizes all inputs to SocialActivity schema.</div>
+        </div>
+        <div class="arrow">|</div>
+        <div class="task-card pending">
+          <div class="task-id">DATE-M2-2 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Dating Intelligence</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">10-14h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">needs DATE-M2-1</span>
+          </div>
+          <div class="task-pub">publishes: DatingReportPublished</div>
+          <div class="task-val"><strong>Delivers:</strong> Weekly report, event discovery, gym streaks, Sunday reflection, location score.</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-reloc">RELOC: Relocation</span>
+        <div class="task-card done">
+          <div class="task-id">RELOC-M2-1 <span class="tag tag-done">DONE</span></div>
+          <div class="task-title">Relocation Analyst</div>
+          <div class="task-completed">Completed: 2026-02-22</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">10-14h</span><span class="tag tag-risk-low">LOW</span>
+          </div>
+          <div class="task-pub">publishes: RelocationReportPublished</div>
+          <div class="task-val"><strong>Delivers:</strong> 8-city comparison. Only validated data from spike. Scenario simulator. Confidence per cell.</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-synth">SYNTH: Synthesis</span>
+        <div class="task-card pending">
+          <div class="task-id">SYNTH-M2-1 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Synthesis Engine</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">8-12h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">needs all advisors (DATE missing)</span>
+          </div>
+          <div class="task-pub">publishes: StateUpdated, ConflictDetected, AlertTriggered</div>
+          <div class="task-meta" style="margin-top:4px">
+            <span class="tag tag-acl">ACL: AdvisorAdapter x4</span>
+          </div>
+          <div class="task-val"><strong>Delivers:</strong> Merges all advisor JSON via isolated adapters. Conflict detection. Alert engine. Single SynthesizedState for all renderers.</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-dash">DASH: Presentation</span>
+        <div class="task-card pending">
+          <div class="task-id">DASH-M2-1 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Web Dashboard</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">8-10h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">needs SYNTH + DASH-SPIKE-1</span>
+          </div>
+          <div class="task-meta" style="margin-top:4px">
+            <span class="tag tag-acl">ACL: ViewModelMapper</span>
+          </div>
+          <div class="task-val"><strong>Delivers:</strong> Real data into dashboard shell. Integration only -- UI already built and tested by spike.</div>
+        </div>
+        <div class="task-card pending">
+          <div class="task-id">DASH-M2-2 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">iOS Widget</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">4-6h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">needs SYNTH + DASH-SPIKE-1</span>
+          </div>
+          <div class="task-meta" style="margin-top:4px">
+            <span class="tag tag-acl">ACL: ViewModelMapper (widget)</span>
+          </div>
+          <div class="task-val"><strong>Delivers:</strong> 3 scores on iPhone. Same SynthesizedState, different projection. Scriptable proven by spike.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M3 Column -->
+  <div class="milestone-col">
+    <div class="milestone-header m3-h">
+      <h2>M3: Self-Improving</h2>
+      <div class="desc">Systems learn from your decisions. Weights auto-adjust. Drift reports.</div>
+      <div class="badges">
+        <span class="badge badge-eta">Week 9-12</span>
+        <span class="badge badge-effort">18-27h</span>
+        <span class="badge badge-blocked">NOT STARTED</span>
+      </div>
+    </div>
+    <div class="milestone-body">
+      <div class="mv"><h4>Value Unlocked</h4><p>Zero maintenance. Systems get better over time. Quarterly "how you've changed" reports.</p></div>
+
+      <div class="ctx-section">
+        <span class="ctx-label c-learn">LEARN: Preference Learning</span>
+        <div class="task-card pending">
+          <div class="task-id">LEARN-M3-1 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Scoring Learning Loop</div>
+          <div class="task-meta">
+            <span class="tag tag-p2">P2</span><span class="tag tag-effort">10-15h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">needs APPL-M2-1 (30+ decisions)</span>
+          </div>
+          <div class="task-pub">publishes: WeightsAdjusted, DriftDetected</div>
+          <div class="task-val"><strong>Delivers:</strong> Auto-adjust scoring weights from approve/reject history. 75%+ accuracy after 50 decisions. Feeds back to DISC scorer.</div>
+        </div>
+        <div class="task-card pending">
+          <div class="task-id">LEARN-M3-2 <span class="tag tag-pending-s">PENDING</span></div>
+          <div class="task-title">Advisory Feedback Loop</div>
+          <div class="task-meta">
+            <span class="tag tag-p3">P3</span><span class="tag tag-effort">8-12h</span><span class="tag tag-risk-low">LOW</span>
+            <span class="tag tag-dep">needs SYNTH + DASH</span>
+          </div>
+          <div class="task-pub">publishes: WeightsAdjusted, DriftDetected</div>
+          <div class="task-val"><strong>Delivers:</strong> Thumbs up/down on recommendations. Quarterly priority shift report. Same LEARN mechanism, advisory aggregates.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Legacy Tasks -->
+<div class="legacy-section">
+  <h2>Legacy Tasks (TASK-NNN)</h2>
+  <div class="legacy-grid">
+
+    <div class="legacy-group">
+      <h3 style="color:#58a6ff">Tech Radar (6/7)</h3>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-005</span><span class="lt-name">Use radar.json as data source</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-006</span><span class="lt-name">Restore MCP to Trial ring</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-007</span><span class="lt-name">Fix category assignments</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-008</span><span class="lt-name">Fix fabricated demand numbers</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-009</span><span class="lt-name">Add LLM integration to Trial</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-010</span><span class="lt-name">Rich descriptions overlay</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-011</span><span class="lt-name">Tools quadrant filter</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-012</span><span class="lt-name">Fix name inconsistencies</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-023</span><span class="lt-name">Polish Tech Radar README + screenshots</span></div>
+    </div>
+
+    <div class="legacy-group">
+      <h3 style="color:#a78bfa">Career / Portfolio (6/8)</h3>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-022</span><span class="lt-name">Polish OpenClaw GitHub repo</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-024</span><span class="lt-name">Draft 3 LinkedIn posts</span></div>
+      <div class="legacy-task lt-in-progress"><span class="lt-icon">&#9881;</span><span class="lt-id">TASK-025</span><span class="lt-name">Role-specific CV variants</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-026</span><span class="lt-name">Research 20 target companies</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-027</span><span class="lt-name">Rewrite Upwork profile for AI/ML</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-028</span><span class="lt-name">Application tracker (Google Sheet)</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-029</span><span class="lt-name">Blog post: Banking Java to AI</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-030</span><span class="lt-name">"Hire me" landing page (P3)</span></div>
+    </div>
+
+    <div class="legacy-group">
+      <h3 style="color:#56d364">Fuerteventura / Relocation (4/8)</h3>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-015</span><span class="lt-name">Compare car rental prices</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-016</span><span class="lt-name">Contact Coliving &amp; Surfing</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-017</span><span class="lt-name">Contact Coco Surfhouse</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-018</span><span class="lt-name">Corralejo WhatsApp community</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-019</span><span class="lt-name">Bachata/salsa schedule</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-020</span><span class="lt-name">Flight options WAW to FUE</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-021</span><span class="lt-name">Follow up with Conomad</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-003</span><span class="lt-name">Corralejo Research Package</span></div>
+    </div>
+
+    <div class="legacy-group">
+      <h3 style="color:#d29922">Ops / Recurring (3/5)</h3>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-001</span><span class="lt-name">RAG Pipeline Demo</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-002</span><span class="lt-name">Job Search Automation</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-004</span><span class="lt-name">Weekly Strategic Brief</span></div>
+      <div class="legacy-task lt-done"><span class="lt-icon">&#10003;</span><span class="lt-id">TASK-014</span><span class="lt-name">Pipeline smoke test</span></div>
+      <div class="legacy-task lt-pending"><span class="lt-icon">&#9675;</span><span class="lt-id">TASK-013</span><span class="lt-name">Track Spring AI / LangChain4j (P3)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Table -->
+<div style="padding: 24px 32px; border-top: 1px solid #21262d;">
+  <h3 style="font-size: 14px; color: #f0f6fc; margin-bottom: 12px;">Effort by Context and Milestone</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:12px;">
+    <thead>
+      <tr style="border-bottom:2px solid #30363d;">
+        <th style="text-align:left; padding:6px 8px; color:#8b949e; font-size:10px; text-transform:uppercase;">Context</th>
+        <th style="text-align:center; padding:6px 8px; color:#f97316; font-size:10px;">SPIKE</th>
+        <th style="text-align:center; padding:6px 8px; color:#f97316; font-size:10px;">MVP</th>
+        <th style="text-align:center; padding:6px 8px; color:#a78bfa; font-size:10px;">M1</th>
+        <th style="text-align:center; padding:6px 8px; color:#34d399; font-size:10px;">M2</th>
+        <th style="text-align:center; padding:6px 8px; color:#8b949e; font-size:10px;">M3</th>
+        <th style="text-align:center; padding:6px 8px; color:#f0f6fc; font-size:10px;">TOTAL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#fbbf24; font-weight:600;">SHARED <span style="color:#3fb950;font-size:10px">&#10003;</span></td><td style="text-align:center">--</td><td style="text-align:center;color:#3fb950">10-15h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">10-15h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#58a6ff; font-weight:600;">DISC <span style="color:#3fb950;font-size:10px">&#10003;</span></td><td style="text-align:center;color:#3fb950">6-8h &#10003;</td><td style="text-align:center;color:#3fb950">18-27h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">24-35h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#79c0ff; font-weight:600;">APPL <span style="color:#3fb950;font-size:10px">&#10003;</span></td><td style="text-align:center;color:#3fb950">4-6h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center;color:#3fb950">12-18h &#10003;</td><td style="text-align:center;color:#3fb950">12-16h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">28-40h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#a78bfa; font-weight:600;">MKTL <span style="color:#3fb950;font-size:10px">&#10003;</span></td><td style="text-align:center">--</td><td style="text-align:center;color:#3fb950">10-14h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">10-14h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#d2a8ff; font-weight:600;">CRST <span style="color:#3fb950;font-size:10px">&#10003;</span></td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center;color:#3fb950">12-16h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">12-16h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#f778ba; font-weight:600;">DATE <span style="color:#f97316;font-size:10px">&#9679;</span></td><td style="text-align:center;color:#f97316">6-8h &#9679;</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center;color:#6e7681">18-24h</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">24-32h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#56d364; font-weight:600;">RELOC <span style="color:#3fb950;font-size:10px">&#10003;</span></td><td style="text-align:center;color:#3fb950">4-6h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center;color:#3fb950">10-14h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">14-20h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#3fb950; font-weight:600;">SYNTH</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center;color:#6e7681">8-12h</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">8-12h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#58a6ff; font-weight:600;">DASH</td><td style="text-align:center;color:#3fb950">6-8h &#10003;</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center;color:#6e7681">12-16h</td><td style="text-align:center">--</td><td style="text-align:center; font-weight:600;">18-24h</td></tr>
+      <tr style="border-bottom:1px solid #21262d;"><td style="padding:6px 8px; color:#d29922; font-weight:600;">LEARN</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center">--</td><td style="text-align:center;color:#6e7681">18-27h</td><td style="text-align:center; font-weight:600;">18-27h</td></tr>
+    </tbody>
+    <tfoot>
+      <tr style="border-top:2px solid #30363d;">
+        <td style="padding:8px; font-weight:700; color:#f0f6fc;">TOTAL</td>
+        <td style="text-align:center; color:#fbbf24; font-weight:600;">26-36h</td>
+        <td style="text-align:center; color:#f97316; font-weight:600;">38-56h</td>
+        <td style="text-align:center; color:#a78bfa; font-weight:600;">12-18h</td>
+        <td style="text-align:center; color:#34d399; font-weight:600;">72-98h</td>
+        <td style="text-align:center; color:#8b949e; font-weight:600;">18-27h</td>
+        <td style="text-align:center; color:#58a6ff; font-weight:700; font-size:14px;">166-235h</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="legend">
+  <span class="legend-title">Legend:</span>
+  <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Done</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> In Progress / Current</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6e7681"></div> Pending</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div> Blocked</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d2a8ff"></div> ACL boundary</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7ee787"></div> Domain Event</div>
+</div>
+
+</body>
+</html>
