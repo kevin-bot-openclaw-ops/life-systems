@@ -112,13 +112,25 @@ async def get_job_detail(
     return JobDetail(**job, draft=draft)
 
 
-@app.get("/api/dashboard", response_model=DashboardState)
+@app.get("/api/dashboard")
 async def get_dashboard(
     username: str = Depends(verify_auth),
     db: Database = Depends(get_db)
 ):
-    """Get synthesized dashboard state."""
-    return db.get_dashboard_state()
+    """Get synthesized dashboard state matching frontend contract."""
+    # Import the new dashboard builder
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from database.dashboard import get_dashboard_state as build_dashboard
+    
+    # Build complete dashboard data
+    dashboard_data = build_dashboard()
+    
+    # Return with timestamp
+    return {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "payload": dashboard_data
+    }
 
 
 @app.get("/api/market", response_model=MarketReport)
@@ -198,9 +210,9 @@ async def get_widget_data(
     
     return {
         "career_score": state.get("career_score", 0),
-        "jobs_today": state.get("jobs_today", 0),
-        "top_job_title": state.get("top_job_title", "No jobs"),
-        "last_scan_ago": state.get("last_scan_ago", "never")
+        "dating_score": state.get("dating_score", 0),
+        "gym_streak": state.get("gym_streak", 0),
+        "actions_today": state.get("actions_today", 0)
     }
 
 
