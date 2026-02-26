@@ -36,7 +36,11 @@ async def run_scan(db: Database) -> List[Dict[str, Any]]:
         AIJobsUKSource()
     ]
     
-    scanner = JobScanner(sources=sources)
+    # Create output directory for scanner state
+    output_dir = Path("/var/lib/life-systems/scanner")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    scanner = JobScanner(sources=sources, output_dir=output_dir)
     scorer = JobScorer()
     
     # Run scan
