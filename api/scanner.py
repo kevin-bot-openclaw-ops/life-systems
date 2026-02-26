@@ -76,7 +76,12 @@ async def run_scan(db: Database) -> List[Dict[str, Any]]:
         }
         
         # Score the job
-        score_result = scorer.score(listing_dict)
+        scored = scorer.score_listing(listing_dict)
+        score_result = {
+            'passed': not scored.rejected,
+            'score': scored.score,
+            'breakdown': scored.breakdown.model_dump()
+        }
         
         # Only save jobs that pass filters
         if score_result.get('passed', False):
