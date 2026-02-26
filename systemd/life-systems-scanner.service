@@ -5,8 +5,9 @@ After=network.target
 [Service]
 Type=oneshot
 User=ubuntu
-WorkingDirectory=/home/ubuntu/.openclaw/workspace/life-systems
-Environment="PATH=/home/ubuntu/.pyenv/shims:/usr/local/bin:/usr/bin:/bin"
+WorkingDirectory=/opt/life-systems
+Environment="PATH=/opt/life-systems/venv/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="DB_PATH=/var/lib/life-systems/life.db"
+Environment="PYTHONPATH=/opt/life-systems"
 EnvironmentFile=/etc/life-systems/env
-ExecStart=/home/ubuntu/.pyenv/shims/python3 -c "import asyncio; from api.database import Database, init_db; from api.scanner import run_scan; db_path='/var/lib/life-systems/life.db'; init_db(db_path); db=Database(db_path); asyncio.run(run_scan(db))"
+ExecStart=/opt/life-systems/venv/bin/python3 -c "import asyncio; from api.database import Database, init_db; from api.scanner import run_scan; db_path='/var/lib/life-systems/life.db'; init_db(db_path); db=Database(db_path); asyncio.run(run_scan(db))"
