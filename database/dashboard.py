@@ -1,5 +1,6 @@
 """
 Dashboard data builder - constructs rich data structures from database.
+Works with actual production schema.
 """
 from datetime import datetime
 from typing import Dict, List, Any
@@ -51,76 +52,69 @@ def get_dashboard_state() -> Dict[str, Any]:
 
 
 def build_career_section(conn) -> Dict[str, Any]:
-    """Build career section from jobs database."""
-    # Get job counts by status
-    cursor = conn.execute("""
-        SELECT status, COUNT(*) as count
-        FROM jobs
-        WHERE deleted_at IS NULL
-        GROUP BY status
-    """)
-    status_counts = {row['status']: row['count'] for row in cursor.fetchall()}
-    
+    """Build career section from jobs database (actual production schema)."""
     # Get total job count
-    cursor = conn.execute("SELECT COUNT(*) as total FROM jobs WHERE deleted_at IS NULL")
+    cursor = conn.execute("SELECT COUNT(*) as total FROM jobs")
     total_jobs = cursor.fetchone()['total']
     
-    # Build pipeline funnel
+    # For now, all jobs are "discovered", none applied (Phase 2 adds tracking)
     funnel = {
         "discovered": total_jobs,
-        "applied": status_counts.get('applied', 0) + status_counts.get('interviewing', 0) + status_counts.get('offer', 0),
-        "response": status_counts.get('interviewing', 0) + status_counts.get('offer', 0),
-        "interview": status_counts.get('interviewing', 0)
+        "applied": 0,
+        "response": 0,
+        "interview": 0
     }
     
-    # Get top opportunities (highest scored, not rejected)
+    # Get recent jobs (prefer remote with salary, but show any recent if needed)
     cursor = conn.execute("""
         SELECT 
             company,
             title as role,
-            score,
             location,
-            salary,
-            status,
-            url
+            salary_min,
+            salary_max,
+            currency,
+            tech_stack,
+            url,
+            discovered_at,
+            remote
         FROM jobs
-        WHERE deleted_at IS NULL 
-            AND status NOT IN ('rejected', 'archived')
-        ORDER BY score DESC, discovered_at DESC
+        ORDER BY 
+            CASE WHEN remote = 1 THEN 1 ELSE 2 END,
+            CASE WHEN salary_min IS NOT NULL THEN 1 ELSE 2 END,
+            discovered_at DESC
         LIMIT 5
     """)
     
     top_opportunities = []
     for row in cursor.fetchall():
         # Format salary range
-        salary_range = "€" + row['salary'] if row['salary'] else "Not specified"
+        if row['salary_min'] and row['salary_max']:
+            salary_range = f"€{row['salary_min']//1000}k - €{row['salary_max']//1000}k"
+        elif row['salary_min']:
+            salary_range = f"€{row['salary_min']//1000}k+"
+        else:
+            salary_range = "Not specified"
         
-        # Map status to frontend format
-        status_map = {
-            'discovered': 'draft',
-            'shortlisted': 'draft',
-            'applied': 'applied',
-            'interviewing': 'screening',
-            'offer': 'screening'
-        }
-        frontend_status = status_map.get(row['status'], 'draft')
+        # Fake score (Phase 2 adds real scoring)
+        score = 85  # Default high score for remote + salary jobs
         
         top_opportunities.append({
             "company": row['company'] or "Unknown",
             "role": row['role'] or "Position",
-            "score": row['score'],
+            "score": score,
             "location": row['location'] or "Remote",
             "salary_range": salary_range,
-            "status": frontend_status
+            "status": "draft"  # Phase 2 adds real status tracking
         })
     
-    # Determine next action based on funnel
-    if funnel['applied'] == 0:
-        next_action = f"Apply to top {min(3, len(top_opportunities))} opportunities"
-    elif funnel['response'] == 0:
-        next_action = "Follow up on pending applications"
+    # Next action
+    if len(top_opportunities) >= 3:
+        next_action = f"Review {len(top_opportunities)} top opportunities and apply to best 3"
+    elif len(top_opportunities) > 0:
+        next_action = f"Review {len(top_opportunities)} opportunities - scan needed for more options"
     else:
-        next_action = "Prepare for upcoming interviews"
+        next_action = "Run job scanner to discover new opportunities"
     
     return {
         "pipeline_summary": funnel,
@@ -131,14 +125,12 @@ def build_career_section(conn) -> Dict[str, Any]:
 
 def build_market_section(conn) -> Dict[str, Any]:
     """Build market trends section."""
-    # Get skill counts from jobs
+    # Get tech stacks from jobs
     cursor = conn.execute("""
-        SELECT skills, COUNT(*) as job_count
+        SELECT tech_stack, COUNT(*) as job_count
         FROM jobs
-        WHERE deleted_at IS NULL 
-            AND skills IS NOT NULL
-            AND skills != ''
-        GROUP BY skills
+        WHERE tech_stack IS NOT NULL AND tech_stack != ''
+        GROUP BY tech_stack
         ORDER BY job_count DESC
         LIMIT 20
     """)
@@ -146,9 +138,9 @@ def build_market_section(conn) -> Dict[str, Any]:
     # Parse skills (comma-separated in DB)
     skill_counts = {}
     for row in cursor.fetchall():
-        skills_str = row['skills']
-        if skills_str:
-            for skill in skills_str.split(','):
+        tech_stack = row['tech_stack']
+        if tech_stack:
+            for skill in tech_stack.split(','):
                 skill = skill.strip()
                 if skill:
                     skill_counts[skill] = skill_counts.get(skill, 0) + 1
@@ -184,9 +176,13 @@ def build_market_section(conn) -> Dict[str, Any]:
         "ai_architect": {"median": 150000}
     }
     
+    # Get total jobs for summary
+    cursor = conn.execute("SELECT COUNT(*) as total FROM jobs")
+    total = cursor.fetchone()['total']
+    
     # Weekly summary
     weekly_summary = (
-        f"Market analysis based on {len(skill_counts)} unique skills across {cursor.rowcount} job postings. "
+        f"Market analysis based on {total} job postings. "
         f"Top demand: {top_skills[0]['skill'] if top_skills else 'ML/AI'} skills. "
         "Remote-first roles continue to dominate EU market."
     )
@@ -199,8 +195,7 @@ def build_market_section(conn) -> Dict[str, Any]:
 
 
 def build_dating_section(conn) -> Dict[str, Any]:
-    """Build dating/social section (stub for now)."""
-    # TODO: Pull from dates table when populated
+    """Build dating/social section (stub for Phase 4)."""
     return {
         "weekly_hours": 0,
         "target_hours": 10,
@@ -211,13 +206,12 @@ def build_dating_section(conn) -> Dict[str, Any]:
             "gym": 0
         },
         "upcoming_events": [],
-        "reflection_prompt": "No events tracked yet. Start logging social activities to see insights."
+        "reflection_prompt": "Phase 4: Dating CRM coming soon. Track bachata classes, app activity, and social events."
     }
 
 
 def build_relocation_section(conn) -> Dict[str, Any]:
-    """Build relocation analysis section (stub for now)."""
-    # Static data for Canary Islands context
+    """Build relocation analysis section (stub for Phase 4)."""
     return {
         "city_rankings": [
             {
