@@ -1,5 +1,5 @@
 life.plocha.eu {
-    basicauth /* {
+    basic_auth /* {
         jurek $2a$14$YFYzYUlbo3ihDIeHt3oKzO4kyIzT9Ux/mtW4XLui4ZEbTycsN8g7G
     }
     
@@ -8,7 +8,7 @@ life.plocha.eu {
     }
     
     handle {
-        root * /opt/life-systems/frontend/dist
+        root * /opt/life-systems/api/static
         try_files {path} /index.html
         file_server
     }
@@ -17,6 +17,3 @@ life.plocha.eu {
         output file /var/log/caddy/life-systems.log
     }
 }
-
-# Note: Password hash generated with: caddy hash-password --plaintext 'LifeSystems2026!'
-# This is a placeholder - will be regenerated during deployment
