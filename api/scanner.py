@@ -43,32 +43,56 @@ async def run_scan(db: Database) -> List[Dict[str, Any]]:
     scanner = JobScanner(sources=sources, output_dir=output_dir)
     scorer = JobScorer()
     
-    # Run scan
-    listings = scanner.scan()
+    # Run scan - scanner.scan() doesn't return listings, we need to fetch them directly
+    # For now, let's fetch from all sources and process
+    all_listings = []
+    for source in sources:
+        try:
+            listings = source.fetch()
+            all_listings.extend(listings)
+        except Exception as e:
+            print(f"Error fetching from {source.__class__.__name__}: {e}")
+            continue
     
     results = []
-    for listing in listings:
+    for listing in all_listings:
         # Create job ID
-        job_id = create_job_id(listing.get('title', ''), listing.get('company', ''))
+        job_id = create_job_id(listing.role, listing.company)
+        
+        # Convert JobListing to dict for scoring
+        listing_dict = {
+            'title': listing.role,
+            'company': listing.company,
+            'location': listing.location.value if hasattr(listing.location, 'value') else str(listing.location),
+            'remote': listing.location.value == 'remote' if hasattr(listing.location, 'value') else True,
+            'description': listing.description,
+            'salary_min': listing.salary_range.min if listing.salary_range else None,
+            'salary_max': listing.salary_range.max if listing.salary_range else None,
+            'currency': listing.salary_range.currency.value if listing.salary_range else 'EUR',
+            'tech_stack': listing.tech_stack,
+            'url': listing.url,
+            'sources': listing.sources,
+            'seniority': listing.seniority.value if hasattr(listing.seniority, 'value') else str(listing.seniority)
+        }
         
         # Score the job
-        score_result = scorer.score(listing)
+        score_result = scorer.score(listing_dict)
         
         # Only save jobs that pass filters
         if score_result.get('passed', False):
             job_data = {
                 'id': job_id,
-                'title': listing.get('title', 'Unknown'),
-                'company': listing.get('company', 'Unknown'),
-                'location': listing.get('location', 'Remote'),
-                'remote': listing.get('remote', True),
-                'description': listing.get('description', ''),
-                'salary_min': listing.get('salary_min'),
-                'salary_max': listing.get('salary_max'),
-                'currency': listing.get('currency', 'EUR'),
-                'tech_stack': listing.get('tech_stack', []),
-                'url': listing.get('url', ''),
-                'sources': listing.get('sources', [])
+                'title': listing.role,
+                'company': listing.company,
+                'location': listing_dict['location'],
+                'remote': listing_dict['remote'],
+                'description': listing.description,
+                'salary_min': listing_dict['salary_min'],
+                'salary_max': listing_dict['salary_max'],
+                'currency': listing_dict['currency'],
+                'tech_stack': listing.tech_stack,
+                'url': listing.url,
+                'sources': listing.sources
             }
             
             score_data = {
