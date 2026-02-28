@@ -117,20 +117,25 @@ async def get_dashboard(
     username: str = Depends(verify_auth),
     db: Database = Depends(get_db)
 ):
-    """Get synthesized dashboard state matching frontend contract."""
-    # Import the new dashboard builder
+    """
+    Get dashboard view model (TASK-039 compliant).
+    
+    Returns DashboardViewModel shape as specified in TASK-039-subtasks.md (039-A):
+    {
+      "career": {score, totalJobs, topJobs[], funnel, lastScan},
+      "dating": {score, dates[], weeklyHours, upcomingEvents[]},
+      "system": {version, lastHealthCheck, status},
+      "alerts": [],
+      "fetchedAt": "ISO timestamp"
+    }
+    """
+    # Import the TASK-039 compliant builder
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from database.dashboard import get_dashboard_state as build_dashboard
+    from database.dashboard_v2 import get_dashboard_view_model
     
-    # Build complete dashboard data
-    dashboard_data = build_dashboard()
-    
-    # Return with timestamp
-    return {
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "payload": dashboard_data
-    }
+    # Build and return view model
+    return get_dashboard_view_model()
 
 
 @app.get("/api/market", response_model=MarketReport)
