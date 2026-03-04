@@ -70,10 +70,48 @@ async def startup_event():
 
 @app.get("/api/health")
 async def health():
-    """Health check endpoint."""
+    """
+    Health check endpoint with DB version and table counts.
+    SHARED-MVP-1 acceptance criteria.
+    """
+    import sqlite3
+    
+    db_path = Path(os.getenv("DB_PATH", "/var/lib/life-systems/life.db"))
+    
+    # Get DB version and table counts
+    conn = sqlite3.connect(str(db_path))
+    
+    # Get schema version
+    try:
+        version_row = conn.execute(
+            "SELECT version FROM schema_version ORDER BY applied_at DESC LIMIT 1"
+        ).fetchone()
+        db_version = version_row[0] if version_row else "unknown"
+    except sqlite3.OperationalError:
+        db_version = "legacy"
+    
+    # Get table counts (exclude metadata and v4 archived tables)
+    cursor = conn.execute("""
+        SELECT name FROM sqlite_master 
+        WHERE type='table' 
+            AND name NOT LIKE '%_v4'
+            AND name NOT IN ('schema_version', 'sqlite_sequence')
+        ORDER BY name
+    """)
+    
+    table_counts = {}
+    for row in cursor.fetchall():
+        table_name = row[0]
+        count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+        table_counts[table_name] = count
+    
+    conn.close()
+    
     return {
         "status": "ok",
         "version": "0.1.0",
+        "db_version": db_version,
+        "db_tables": table_counts,
         "timestamp": datetime.utcnow().isoformat()
     }
 
