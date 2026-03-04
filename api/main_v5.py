@@ -85,7 +85,8 @@ async def health():
 @app.get("/api/dashboard")
 async def get_dashboard(username: str = Depends(verify_auth)):
     """Dashboard view model (v5 minimal stub until DASH-MVP-1)."""
-    return {
+    # Wrap in payload.sections structure for compatibility with old frontend
+    sections = {
         "career": {
             "score": 0,
             "totalJobs": 0,
@@ -99,11 +100,22 @@ async def get_dashboard(username: str = Depends(verify_auth)):
             "weeklyHours": 0,
             "upcomingEvents": []
         },
-        "system": {
-            "version": "0.1.0",
-            "lastHealthCheck": datetime.utcnow().isoformat() + "Z",
-            "status": "ok"
+        "market": {
+            "top_skills": [],
+            "salary_ranges": {},
+            "weekly_summary": "No data yet"
         },
-        "alerts": [],
-        "fetchedAt": datetime.utcnow().isoformat() + "Z"
+        "relocation": {
+            "city_rankings": [],
+            "recommendation": "No data yet"
+        }
+    }
+    
+    return {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "payload": {
+            "sections": sections,
+            "conflicts": [],
+            "alerts": []
+        }
     }
