@@ -14,13 +14,19 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import secrets
 
-from .database import Database, init_db
-from .models import (
-    Job, JobDetail, DashboardState, MarketReport,
-    DraftRequest, DraftResponse, DecisionRequest
-)
-from .scanner import run_scan
-from .draft_generator import generate_draft
+try:
+    from .database import Database, init_db
+    from .scanner import run_scan
+    from .draft_generator import generate_draft
+except ImportError:
+    # Old v4 modules may not exist, that's OK
+    Database = None
+    init_db = None
+    run_scan = None
+    generate_draft = None
+
+# Import v5 routers
+from .routes import dates as dates_router
 
 
 # Initialize FastAPI app
@@ -29,6 +35,9 @@ app = FastAPI(
     description="Personal intelligence platform for career, dating, and relocation",
     version="0.1.0"
 )
+
+# Register v5 routers
+app.include_router(dates_router.router)
 
 # Basic auth
 security = HTTPBasic()
