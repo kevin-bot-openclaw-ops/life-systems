@@ -86,28 +86,33 @@ async def health():
 async def get_dashboard(username: str = Depends(verify_auth)):
     """Dashboard view model (v5 minimal stub until DASH-MVP-1)."""
     # Wrap in payload.sections structure for compatibility with old frontend
+    # Field names match what index.html expects
     sections = {
         "career": {
-            "score": 0,
-            "totalJobs": 0,
-            "topJobs": [],
-            "funnel": {"discovered": 0, "applied": 0, "responded": 0, "interviewing": 0, "offered": 0},
-            "lastScan": None
+            "pipeline_summary": {"discovered": 0, "applied": 0, "response": 0, "interview": 0},
+            "top_opportunities": [],  # Empty until DISC-MVP-2 + APPL-MVP-1 done
+            "next_action": "No jobs discovered yet. Run job scanner to populate."
         },
         "dating": {
             "score": 0,
-            "dates": [],
-            "weeklyHours": 0,
-            "upcomingEvents": []
+            "weekly_hours": 0,
+            "target_hours": 10,
+            "activity_breakdown": {"bachata": 0, "dating_apps": 0, "social_events": 0, "gym": 0},
+            "upcoming_events": [],
+            "reflection_prompt": "No dates logged yet. Start tracking to see insights."
         },
         "market": {
             "top_skills": [],
-            "salary_ranges": {},
-            "weekly_summary": "No data yet"
+            "salary_ranges": {
+                "senior_ml_engineer": {"median": 120000},
+                "ml_platform_engineer": {"median": 135000},
+                "ai_architect": {"median": 150000}
+            },
+            "weekly_summary": "No market data yet."
         },
         "relocation": {
             "city_rankings": [],
-            "recommendation": "No data yet"
+            "recommendation": "No cities evaluated yet. Add cities to compare."
         }
     }
     
