@@ -1,0 +1,37 @@
+{
+  "weights": {
+    "dating_pool": 0.20,
+    "ai_job_density": 0.20,
+    "cost_index": 0.20,
+    "lifestyle_score": 0.20,
+    "community_score": 0.20
+  },
+  "normalization": {
+    "dating_pool": {
+      "min": 0,
+      "max": 5000,
+      "invert": false
+    },
+    "ai_job_density": {
+      "min": 0,
+      "max": 200,
+      "invert": false
+    },
+    "cost_index": {
+      "min": 0.5,
+      "max": 2.0,
+      "invert": true
+    },
+    "lifestyle_score": {
+      "min": 1,
+      "max": 10,
+      "invert": false
+    },
+    "community_score": {
+      "min": 1,
+      "max": 10,
+      "invert": false
+    }
+  },
+  "description": "Location scoring configuration. Weights must sum to 1.0. Normalization ranges define min/max for each dimension. Set invert=true for dimensions where lower is better (e.g., cost_index)."
+}
