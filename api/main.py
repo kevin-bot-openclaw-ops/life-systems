@@ -28,6 +28,7 @@ except ImportError:
 # Import v5 routers
 from .routes import dates as dates_router
 from .routes import cities as cities_router
+from .routes import jobs as jobs_router
 
 # Import v5 models for backward compatibility
 from .models import JobResponse as Job
@@ -43,6 +44,7 @@ app = FastAPI(
 # Register v5 routers
 app.include_router(dates_router.router)
 app.include_router(cities_router.router)
+app.include_router(jobs_router.router, prefix="/api")
 
 # Basic auth
 security = HTTPBasic()
@@ -130,42 +132,8 @@ async def health():
     }
 
 
-@app.get("/api/jobs")
-async def get_jobs(
-    limit: int = 10,
-    offset: int = 0,
-    min_score: Optional[float] = None,
-    username: str = Depends(verify_auth),
-    db: Database = Depends(get_db)
-):
-    """Get scored job listings (v4 legacy endpoint)."""
-    if not db:
-        return {"jobs": [], "message": "Database not initialized"}
-    jobs = db.get_jobs(limit=limit, offset=offset, min_score=min_score)
-    return jobs
-
-
-@app.get("/api/jobs/{job_id}")
-async def get_job_detail(
-    job_id: str,
-    username: str = Depends(verify_auth),
-    db: Database = Depends(get_db)
-):
-    """Get detailed job listing (v4 legacy endpoint)."""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not initialized")
-    job = db.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    # Get existing draft or generate new one
-    draft = db.get_draft(job_id)
-    if not draft and generate_draft:
-        draft_text = generate_draft(job)
-        draft_id = db.save_draft(job_id, draft_text)
-        draft = {"id": draft_id, "job_id": job_id, "text": draft_text}
-    
-    return {**job, "draft": draft}
+# V4 legacy endpoints removed - now using v5 jobs router above
+# See api/routes/jobs.py for APPL-MVP-1 implementation
 
 
 @app.get("/api/dashboard")
@@ -206,59 +174,7 @@ async def get_market_report(
     return report
 
 
-@app.post("/api/jobs/{job_id}/draft")
-async def create_draft(
-    job_id: str,
-    request: Optional[dict] = None,
-    username: str = Depends(verify_auth),
-    db: Database = Depends(get_db)
-):
-    """Generate a cover letter draft for a job."""
-    job = db.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    # Generate draft
-    draft_text = generate_draft(
-        job,
-        variant=request.variant if request else None
-    )
-    
-    # Save to database
-    draft_id = db.save_draft(job_id, draft_text)
-    
-    return DraftResponse(
-        id=draft_id,
-        job_id=job_id,
-        text=draft_text,
-        created_at=datetime.utcnow()
-    )
-
-
-@app.post("/api/jobs/{job_id}/decide")
-async def decide_on_job(
-    job_id: str,
-    decision: dict,
-    username: str = Depends(verify_auth),
-    db: Database = Depends(get_db)
-):
-    """Record a decision on a job (approve/reject/defer)."""
-    job = db.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    # Record decision
-    db.save_decision(
-        job_id=job_id,
-        action=decision.action,
-        reason=decision.reason
-    )
-    
-    return {
-        "status": "success",
-        "job_id": job_id,
-        "action": decision.action
-    }
+# V4 legacy endpoints for /draft and /decide removed - now using v5 jobs router above
 
 
 @app.get("/api/widget")
