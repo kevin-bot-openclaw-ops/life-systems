@@ -1,0 +1,109 @@
+# Job Scoring Configuration for Life Systems v5
+# DISC-MVP-2: 5-Dimension Scoring Engine
+
+# Composite score weights (must sum to 1.0)
+weights:
+  role_match: 0.30       # Keyword matching importance
+  remote_friendly: 0.25  # Remote vs hybrid vs onsite
+  salary_fit: 0.20       # Distance from EUR 150k target
+  tech_overlap: 0.15     # % match with Jurek's skills
+  company_quality: 0.10  # Known vs unknown companies
+
+# Salary target (EUR)
+target_salary_eur: 150000
+
+# Target keywords for role_match scoring (tiered by importance)
+target_keywords:
+  tier1:  # 3 points each
+    - mcp
+    - model context protocol
+    - llm
+    - large language model
+    - rag
+    - retrieval augmented generation
+    - ai engineer
+    - ml engineer
+  
+  tier2:  # 2 points each
+    - mlops
+    - machine learning
+    - nlp
+    - deep learning
+    - python
+    - pytorch
+    - tensorflow
+    - langchain
+    - banking
+    - financial services
+    - fintech
+  
+  tier3:  # 1 point each
+    - java
+    - spring
+    - kubernetes
+    - docker
+    - aws
+    - data science
+    - analytics
+    - sql
+    - api
+
+# Jurek's skills for tech_overlap calculation
+skills:
+  - python
+  - java
+  - spring
+  - llm
+  - rag
+  - mcp
+  - langchain
+  - fastapi
+  - docker
+  - kubernetes
+  - sql
+  - postgresql
+  - banking
+  - financial services
+  - rest api
+  - microservices
+  - aws
+  - mlops
+
+# Known quality companies (case-insensitive matching)
+known_companies:
+  # FAANG + Big Tech
+  - google
+  - microsoft
+  - amazon
+  - meta
+  - apple
+  - netflix
+  
+  # AI Leaders
+  - openai
+  - anthropic
+  - cohere
+  - mistral
+  - databricks
+  - hugging face
+  - scale ai
+  
+  # Fintech
+  - stripe
+  - revolut
+  - wise
+  - n26
+  - klarna
+  
+  # Banks (Jurek's domain)
+  - jpmorgan
+  - jp morgan
+  - goldman sachs
+  - morgan stanley
+  - deutsche bank
+  - citi
+  - citigroup
+  - hsbc
+  - barclays
+  - ubs
+  - credit suisse
