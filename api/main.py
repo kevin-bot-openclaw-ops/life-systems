@@ -174,15 +174,17 @@ async def get_dashboard(
     db: Database = Depends(get_db)
 ):
     """
-    Get dashboard view model (TASK-039 compliant).
+    Get dashboard view model (advisor paradigm).
     
-    Returns DashboardViewModel shape as specified in TASK-039-subtasks.md (039-A):
+    Returns advisor-format shape for advisor.html:
     {
-      "career": {score, totalJobs, topJobs[], funnel, lastScan},
-      "dating": {score, dates[], weeklyHours, upcomingEvents[]},
-      "system": {version, lastHealthCheck, status},
-      "alerts": [],
-      "fetchedAt": "ISO timestamp"
+      "advisor": {
+        "career": {goal, one_liner, data_table, actions, empty_state},
+        "dating": {goal, one_liner, data_table, actions, empty_state},
+        "location": {goal, one_liner, data_table, actions, empty_state},
+        "recommendations": []
+      },
+      "timestamp": "ISO timestamp"
     }
     """
     # Import the TASK-039 compliant builder
@@ -190,8 +192,87 @@ async def get_dashboard(
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from database.dashboard_v2 import get_dashboard_view_model
     
-    # Build and return view model
-    return get_dashboard_view_model()
+    # Build view model
+    data = get_dashboard_view_model()
+    
+    # Location already in advisor format
+    location_advisor = data.get("location", {})
+    
+    # Transform career to advisor format
+    career_data = data.get("career", {})
+    career_advisor = _transform_career_to_advisor(career_data)
+    
+    # Transform dating to advisor format (stub for now)
+    dating_data = data.get("dating", {})
+    dating_advisor = {
+        "goal": "GOAL-1: Partner + Family",
+        "one_liner": "After you log your first date, I'll start tracking patterns.",
+        "data_table": [],
+        "actions": [],
+        "empty_state": True
+    }
+    
+    # Build advisor response
+    advisor_data = {
+        "advisor": {
+            "dating": dating_advisor,
+            "career": career_advisor,
+            "location": location_advisor,
+            "recommendations": []
+        },
+        "timestamp": data.get("fetchedAt", datetime.utcnow().isoformat())
+    }
+    
+    return advisor_data
+
+
+def _transform_career_to_advisor(career_data: dict) -> dict:
+    """Transform TASK-039 career format to advisor format."""
+    total_jobs = career_data.get("totalJobs", 0)
+    top_jobs = career_data.get("topJobs", [])
+    
+    if total_jobs == 0:
+        return {
+            "goal": "GOAL-2: Senior AI/ML Role (€150k+)",
+            "one_liner": "Job scanner is running. New opportunities will appear here.",
+            "data_table": [],
+            "actions": [],
+            "empty_state": True
+        }
+    
+    # Build one-liner (motivation-first)
+    best_job = top_jobs[0] if top_jobs else None
+    if best_job:
+        one_liner = f"{total_jobs} new roles match your criteria. Top: {best_job['title']} at {best_job['company']}."
+    else:
+        one_liner = f"{total_jobs} new roles match your criteria."
+    
+    # Build data table from top 5 jobs
+    data_table = []
+    for job in top_jobs[:5]:
+        data_table.append({
+            "company": job.get("company", "Unknown"),
+            "role": job.get("title", "Position"),
+            "location": job.get("location", "Remote"),
+            "discovered": job.get("discoveredAt", "")[:10] if job.get("discoveredAt") else ""
+        })
+    
+    # Actions
+    actions = [
+        {
+            "type": "primary",
+            "label": "Review Jobs",
+            "href": "/api/jobs"
+        }
+    ]
+    
+    return {
+        "goal": "GOAL-2: Senior AI/ML Role (€150k+)",
+        "one_liner": one_liner,
+        "data_table": data_table,
+        "actions": actions,
+        "empty_state": False
+    }
 
 
 @app.get("/api/market")
