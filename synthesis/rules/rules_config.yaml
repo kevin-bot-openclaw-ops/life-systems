@@ -1,0 +1,235 @@
+rules:
+  # ============================================================================
+  # DATING DOMAIN RULES
+  # ============================================================================
+  
+  - id: R-DATE-01
+    name: Best Source by Quality
+    domain: dating
+    enabled: true
+    min_data_points: 5
+    trigger:
+      condition: "date_count >= 5 AND unique_sources >= 2"
+      query: |
+        SELECT 
+          source,
+          AVG(quality) as avg_quality,
+          COUNT(*) as count,
+          COUNT(DISTINCT who) as unique_people,
+          ROUND(AVG(quality), 1) as avg_quality_rounded
+        FROM dates
+        WHERE date_of >= date('now', '-90 days')
+        GROUP BY source
+        HAVING count >= 2
+        ORDER BY avg_quality DESC
+    output:
+      template: "{best_source} is your best bet -- {best_avg} avg quality vs {second_avg} on {second_source}."
+      goal_ref: "GOAL-1 (find partner)"
+      data_table_columns: ["source", "avg_quality_rounded", "count", "unique_people"]
+      data_table_headers: ["Source", "Avg Quality", "Dates", "People"]
+
+  - id: R-DATE-02
+    name: Investment Decision Signal
+    domain: dating
+    enabled: true
+    min_data_points: 3
+    trigger:
+      condition: "dates_with_person >= 3"
+      query: |
+        SELECT 
+          who,
+          date_of,
+          quality,
+          COUNT(*) OVER (PARTITION BY who) as date_count
+        FROM dates
+        WHERE who = :person
+        ORDER BY date_of ASC
+    output:
+      template: "You've had {count} dates with {who}. Quality trend: {trend}. {recommendation}"
+      goal_ref: "GOAL-1 (find partner)"
+      data_table_columns: ["date_of", "quality"]
+      data_table_headers: ["Date", "Quality"]
+
+  - id: R-DATE-03
+    name: Quality Trend (4-week rolling)
+    domain: dating
+    enabled: true
+    min_data_points: 8
+    trigger:
+      condition: "recent_date_count >= 8"
+      query: |
+        SELECT 
+          AVG(CASE WHEN date_of >= date('now', '-28 days') THEN quality END) as recent_avg,
+          AVG(CASE WHEN date_of >= date('now', '-56 days') AND date_of < date('now', '-28 days') THEN quality END) as prior_avg,
+          COUNT(CASE WHEN date_of >= date('now', '-28 days') THEN 1 END) as recent_count,
+          COUNT(CASE WHEN date_of >= date('now', '-56 days') AND date_of < date('now', '-28 days') THEN 1 END) as prior_count
+        FROM dates
+    output:
+      template: "Date quality {trend_direction} this month. {delta} vs last month."
+      goal_ref: "GOAL-1 (find partner)"
+      data_table_columns: ["period", "avg_quality", "date_count"]
+      data_table_headers: ["Period", "Avg Quality", "Dates"]
+
+  - id: R-DATE-04
+    name: Engagement Check
+    domain: dating
+    enabled: true
+    min_data_points: 1
+    trigger:
+      condition: "days_since_last_date >= 7"
+      query: |
+        SELECT 
+          MAX(date_of) as last_date,
+          julianday('now') - julianday(MAX(date_of)) as days_since
+        FROM dates
+    output:
+      template: "You haven't logged a date in {days} days. Busy or avoiding?"
+      goal_ref: "GOAL-1 (find partner)"
+      data_table_columns: []
+      data_table_headers: []
+
+  # ============================================================================
+  # CAREER DOMAIN RULES
+  # ============================================================================
+
+  - id: R-CAREER-01
+    name: New High-Match Jobs
+    domain: career
+    enabled: true
+    min_data_points: 1
+    trigger:
+      condition: "new_high_score_jobs >= 1"
+      query: |
+        SELECT 
+          j.title,
+          j.company,
+          j.location,
+          j.salary_range,
+          s.composite_score,
+          j.discovered_at,
+          j.url
+        FROM jobs j
+        JOIN scores s ON j.id = s.job_id
+        WHERE s.composite_score >= 85
+          AND j.discovered_at >= datetime('now', '-24 hours')
+        ORDER BY s.composite_score DESC
+        LIMIT 5
+    output:
+      template: "{count} new jobs match your criteria. Best: {top_score}% at {top_company} ({top_salary}, {top_location})."
+      goal_ref: "GOAL-2 (€150k+ AI/ML role)"
+      data_table_columns: ["title", "company", "composite_score", "salary_range", "location"]
+      data_table_headers: ["Title", "Company", "Match %", "Salary", "Location"]
+
+  - id: R-CAREER-02
+    name: Decision Throughput
+    domain: career
+    enabled: true
+    min_data_points: 1
+    trigger:
+      condition: "weekly_activity >= 1"
+      query: |
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN d.action = 'approve' THEN 1 ELSE 0 END) as approved,
+          SUM(CASE WHEN d.action = 'skip' THEN 1 ELSE 0 END) as skipped,
+          SUM(CASE WHEN d.action = 'save' THEN 1 ELSE 0 END) as saved
+        FROM decisions d
+        WHERE d.decided_at >= datetime('now', '-7 days')
+    output:
+      template: "You reviewed {total} jobs this week. {approved} approved ({approval_rate}%), {skipped} skipped."
+      goal_ref: "GOAL-2 (€150k+ AI/ML role)"
+      data_table_columns: ["action", "count", "percentage"]
+      data_table_headers: ["Action", "Count", "%"]
+
+  - id: R-CAREER-03
+    name: Skill Demand Shift
+    domain: career
+    enabled: true
+    min_data_points: 30
+    trigger:
+      condition: "days_of_data >= 30"
+      query: |
+        WITH skill_counts AS (
+          SELECT 
+            CASE 
+              WHEN LOWER(j.description) LIKE '%mcp%' OR LOWER(j.title) LIKE '%mcp%' THEN 'MCP'
+              WHEN LOWER(j.description) LIKE '%langchain%' OR LOWER(j.title) LIKE '%langchain%' THEN 'LangChain'
+              WHEN LOWER(j.description) LIKE '%rag%' OR LOWER(j.title) LIKE '%rag%' THEN 'RAG'
+              WHEN LOWER(j.description) LIKE '%llm%' OR LOWER(j.title) LIKE '%llm%' THEN 'LLM'
+              ELSE NULL
+            END as skill,
+            CASE 
+              WHEN j.discovered_at >= datetime('now', '-30 days') THEN 'current'
+              WHEN j.discovered_at >= datetime('now', '-60 days') AND j.discovered_at < datetime('now', '-30 days') THEN 'prior'
+            END as period
+          FROM jobs j
+          WHERE j.discovered_at >= datetime('now', '-60 days')
+        )
+        SELECT 
+          skill,
+          COUNT(CASE WHEN period = 'current' THEN 1 END) as current_count,
+          COUNT(CASE WHEN period = 'prior' THEN 1 END) as prior_count
+        FROM skill_counts
+        WHERE skill IS NOT NULL
+        GROUP BY skill
+        HAVING current_count > 0 AND prior_count > 0
+    output:
+      template: "{top_skill} mentions {trend_direction} {percent_change}% this month across {source_count} sources. {positioning}"
+      goal_ref: "GOAL-2 (€150k+ AI/ML role)"
+      data_table_columns: ["skill", "current_count", "prior_count", "change_pct"]
+      data_table_headers: ["Skill", "This Month", "Last Month", "Change %"]
+
+  # ============================================================================
+  # LOCATION DOMAIN RULE
+  # ============================================================================
+
+  - id: R-LOC-01
+    name: City Ranking Change
+    domain: location
+    enabled: true
+    min_data_points: 2
+    trigger:
+      condition: "snapshots >= 2"
+      query: |
+        WITH ranked AS (
+          SELECT 
+            city,
+            composite_score,
+            last_updated,
+            ROW_NUMBER() OVER (PARTITION BY city ORDER BY last_updated DESC) as rn
+          FROM cities
+        ),
+        latest AS (
+          SELECT city, composite_score as current_score
+          FROM ranked WHERE rn = 1
+        ),
+        previous AS (
+          SELECT city, composite_score as prior_score
+          FROM ranked WHERE rn = 2
+        )
+        SELECT 
+          l.city,
+          l.current_score,
+          p.prior_score,
+          ROUND(l.current_score - p.prior_score, 1) as delta
+        FROM latest l
+        JOIN previous p ON l.city = p.city
+        WHERE ABS(l.current_score - p.prior_score) >= 0.5
+        ORDER BY ABS(delta) DESC
+        LIMIT 3
+    output:
+      template: "{top_city} now scores {current_score} vs {second_city} {second_score}. {differentiator} is the differentiator ({diff_pct}% advantage)."
+      goal_ref: "GOAL-3 (location by May 1)"
+      data_table_columns: ["city", "current_score", "prior_score", "delta"]
+      data_table_headers: ["City", "Current Score", "Prior Score", "Change"]
+
+# Empty state templates
+empty_states:
+  R-DATE-01: "After 5 dates (need {remaining} more), I'll tell you your best channel."
+  R-DATE-02: "After 3 dates with {who} (need {remaining} more), I'll show trend analysis."
+  R-DATE-03: "After 8 dates this month (need {remaining} more), I'll show quality trends."
+  R-DATE-04: "Log your first date to enable engagement tracking."
+  R-CAREER-01: "Scanning for high-match jobs daily. First alert when score ≥85."
+  R-CAREER-02: "Review some jobs this week to see your decision patterns."
+  R-CAREER-03: "After 30 days of scanner data (need {remaining} more), I'll show skill trends."
+  R-LOC-01: "After 2 city data snapshots (need {remaining} more), I'll detect ranking changes."
