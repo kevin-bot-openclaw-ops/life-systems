@@ -236,7 +236,9 @@ def _build_career_advisor(conn) -> dict:
 
 
 def _build_location_advisor(conn) -> dict:
-    """GOAL-3: Optimal location decision - city comparison."""
+    """GOAL-3: Optimal location decision - city comparison (CORRECTED 2026-03-07)."""
+    from datetime import datetime, timedelta
+    
     # Count cities evaluated
     cursor = conn.execute("SELECT COUNT(*) as count FROM cities")
     total_cities = cursor.fetchone()['count']
@@ -252,13 +254,16 @@ def _build_location_advisor(conn) -> dict:
             "empty_state": True
         }
     
-    # Get top 3 cities by composite score
+    # Get top 3 cities by composite score (corrected model)
     cursor = conn.execute("""
         SELECT 
             name,
             country,
-            dating_pool,
-            ai_job_density,
+            dating_pool_verified,
+            onsite_hybrid_ai_jobs,
+            remote_ai_jobs,
+            language_advantage,
+            dating_culture_fit,
             composite_score
         FROM cities
         ORDER BY composite_score DESC NULLS LAST
@@ -266,17 +271,41 @@ def _build_location_advisor(conn) -> dict:
     """)
     
     cities = []
-    for row in cursor.fetchall():
-        cities.append({
+    top_city = None
+    for i, row in enumerate(cursor.fetchall()):
+        city_data = {
             "city": f"{row['name']}, {row['country']}",
-            "dating_pool": row['dating_pool'] or "TBD",
-            "ai_jobs": row['ai_job_density'] or "TBD",
-            "score": row['composite_score'] or 0
-        })
+            "dating_pool": f"{row['dating_pool_verified']:,}" if row['dating_pool_verified'] else "TBD",
+            "onsite_jobs": f"{row['onsite_hybrid_ai_jobs']}" if row['onsite_hybrid_ai_jobs'] is not None else "TBD",
+            "remote_jobs": f"{row['remote_ai_jobs']}" if row['remote_ai_jobs'] is not None else "TBD",
+            "score": round(row['composite_score'], 2) if row['composite_score'] else 0
+        }
+        cities.append(city_data)
+        
+        if i == 0:
+            top_city = row
     
-    # Generate one-liner
+    # Generate one-liner with corrected comparison
     if cities and cities[0]['score'] > 0:
-        one_liner = f"{cities[0]['city']} ranks highest for your goals — strongest combination of dating pool + AI job market."
+        # Calculate comparison to Fuerteventura
+        cursor = conn.execute("""
+            SELECT dating_pool_verified, onsite_hybrid_ai_jobs
+            FROM cities
+            WHERE name = 'Fuerteventura'
+        """)
+        fuerte = cursor.fetchone()
+        
+        if fuerte and top_city:
+            dating_multiplier = top_city['dating_pool_verified'] / max(fuerte['dating_pool_verified'], 1)
+            jobs_multiplier = top_city['onsite_hybrid_ai_jobs'] / max(fuerte['onsite_hybrid_ai_jobs'], 1)
+            
+            # Days until May 1, 2026 decision deadline
+            decision_date = datetime(2026, 5, 1)
+            days_until = (decision_date - datetime.utcnow()).days
+            
+            one_liner = f"{top_city['name']} leads with {dating_multiplier:.0f}x larger dating pool and {jobs_multiplier:.0f}x more local AI jobs. ({days_until} days until May 1 decision)."
+        else:
+            one_liner = f"{cities[0]['city']} ranks highest — strongest combination of dating pool + career options."
     else:
         one_liner = f"{total_cities} cities added. Complete data collection to see ranking."
     
@@ -285,11 +314,12 @@ def _build_location_advisor(conn) -> dict:
         "data_table": cities,
         "actions": [
             {"type": "primary", "label": "Full comparison", "href": "/api/cities"},
-            {"type": "secondary", "label": "Add more cities", "href": "/api/cities"}
+            {"type": "secondary", "label": "View details", "href": "/api/cities/recommendation"}
         ],
-        "goal": "GOAL-3: Optimal location decision",
+        "goal": "GOAL-3: Optimal location decision (May 1, 2026 deadline)",
         "empty_state": False
     }
+
 
 
 def _build_recommendations(conn) -> list:
