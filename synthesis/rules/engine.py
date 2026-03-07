@@ -184,6 +184,43 @@ class RulesEngine:
                     SELECT COUNT(DISTINCT last_updated) as count
                     FROM cities
                 """)
+            elif rule['domain'] == 'activities':
+                # Activity rules have different data requirements
+                if 'Dating Pool Exhaustion' in rule['name']:
+                    cursor.execute("""
+                        SELECT COUNT(*) as count FROM activities
+                        WHERE activity_type IN ('bumble', 'tinder')
+                          AND occurred_date >= date('now', '-14 days')
+                    """)
+                elif 'Stress Escalation' in rule['name']:
+                    cursor.execute("""
+                        SELECT COUNT(*) as count FROM activities
+                        WHERE activity_type = 'nerve-stimulus'
+                          AND occurred_date >= date('now', '-14 days')
+                    """)
+                elif 'Exercise Consistency' in rule['name']:
+                    cursor.execute("""
+                        SELECT COUNT(*) as count FROM activities
+                        WHERE activity_type IN ('gym', 'walking', 'swimming', 'yoga', 'uttanasana')
+                          AND occurred_date >= date('now', '-7 days')
+                    """)
+                elif 'Testosterone Protocol' in rule['name']:
+                    cursor.execute("""
+                        SELECT COUNT(*) as count FROM activities
+                        WHERE occurred_date = date('now')
+                    """)
+                elif 'Morning Routine' in rule['name']:
+                    cursor.execute("""
+                        SELECT COUNT(DISTINCT occurred_date) as count FROM activities
+                        WHERE occurred_date >= date('now', '-7 days')
+                    """)
+                elif 'Dating-Activity Correlation' in rule['name']:
+                    cursor.execute("""
+                        SELECT COUNT(*) as count FROM dates
+                        WHERE date_of >= date('now', '-90 days')
+                    """)
+                else:
+                    cursor.execute("SELECT COUNT(*) as count FROM activities")
             else:
                 return {"sufficient": True, "current_count": min_data, "min_required": min_data, "remaining": 0}
             
@@ -363,6 +400,48 @@ class RulesEngine:
                 # Placeholder for differentiator (would need more detailed query)
                 variables['differentiator'] = "composite score"
                 variables['diff_pct'] = round(abs((top['current_score'] - second['current_score']) / second['current_score'] * 100), 0)
+        
+        elif rule_id == "R-ACT-01":
+            # Dating pool exhaustion
+            if data:
+                row = data[0]
+                variables['app'] = row.get('app', 'dating app')
+                variables['N'] = row.get('N', 0)
+        
+        elif rule_id == "R-ACT-02":
+            # Stress escalation
+            if data:
+                row = data[0]
+                variables['increase'] = row.get('increase', 0)
+        
+        elif rule_id == "R-ACT-03":
+            # Exercise consistency
+            if data:
+                row = data[0]
+                variables['N'] = row.get('N', 0)
+                variables['days_ago'] = row.get('days_ago', 0)
+        
+        elif rule_id == "R-ACT-04":
+            # Testosterone protocol score
+            if data:
+                row = data[0]
+                variables['score'] = row.get('score', 0)
+                variables['missing_items'] = row.get('missing_items', 'none')
+        
+        elif rule_id == "R-ACT-05":
+            # Morning routine adherence
+            if data:
+                row = data[0]
+                variables['complete_days'] = row.get('complete_days', 0)
+                variables['adherence_pct'] = row.get('adherence_pct', 0)
+        
+        elif rule_id == "R-ACT-06":
+            # Dating-activity correlation
+            if data:
+                row = data[0]
+                # Template is hardcoded, no variables needed beyond what's in the query
+                # But we'll extract them for safety
+                pass
         
         return variables
     

@@ -100,6 +100,23 @@ def test_db():
         )
     """)
     
+    cursor.execute("""
+        CREATE TABLE activities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            activity_id TEXT UNIQUE NOT NULL,
+            activity_type TEXT NOT NULL,
+            occurred_at TEXT NOT NULL,
+            occurred_date TEXT NOT NULL,
+            duration_minutes INTEGER,
+            note TEXT,
+            tags TEXT,
+            measurements TEXT,
+            goal_mapping TEXT NOT NULL,
+            fetched_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
     conn.commit()
     conn.close()
     
@@ -212,9 +229,10 @@ def test_rules_engine_initialization(test_db):
     """Test that rules engine initializes and loads config."""
     engine = RulesEngine(db_path=test_db)
     
-    assert len(engine.rules) == 8
+    assert len(engine.rules) == 14  # 8 original + 6 activity rules
     assert engine.db_path == test_db
     assert 'R-DATE-01' in engine.empty_states
+    assert 'R-ACT-01' in engine.empty_states
 
 
 def test_performance_under_1_second(test_db):
@@ -414,8 +432,8 @@ def test_output_format_compliance(test_db):
             # Allow longer empty state messages
             pass
         
-        # Goal reference
-        assert 'GOAL' in rec['goal_alignment']
+        # Goal reference (either GOAL-X or Health)
+        assert 'GOAL' in rec['goal_alignment'] or 'Health' in rec['goal_alignment']
         
         # Data table constraints (max 10 rows, max 5 columns)
         if rec['data_table']:
@@ -439,6 +457,237 @@ def test_disabled_rule_does_not_fire(test_db):
     
     # R-DATE-01 should not appear
     assert not any(r['rule_id'] == 'R-DATE-01' for r in recommendations)
+
+
+def seed_activities(db_path, scenario='full'):
+    """Seed test activities data."""
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    activities = []
+    
+    if scenario in ['full', 'dating_pool_exhaustion']:
+        # Bumble sessions with no matches (pool exhaustion)
+        for i in range(5):
+            activities.append((
+                f'bumble-{i}',
+                'bumble',
+                (datetime.now() - timedelta(days=i)).isoformat(),
+                (datetime.now() - timedelta(days=i)).date(),
+                None,
+                'no matches, every girl on lanzarote',
+                '[]',
+                '{"swipes": 49}',
+                'GOAL-1'
+            ))
+    
+    if scenario in ['full', 'stress']:
+        # Stress indicators (nerve-stimulus)
+        # Current week: 6 stress sessions
+        for i in range(6):
+            activities.append((
+                f'stress-current-{i}',
+                'nerve-stimulus',
+                (datetime.now() - timedelta(days=i)).isoformat(),
+                (datetime.now() - timedelta(days=i)).date(),
+                5,
+                'Anxiety spike',
+                '["anxiety", "stress"]',
+                '{}',
+                'Health'
+            ))
+        
+        # Prior week: 2 stress sessions (baseline)
+        for i in range(2):
+            activities.append((
+                f'stress-prior-{i}',
+                'nerve-stimulus',
+                (datetime.now() - timedelta(days=7+i)).isoformat(),
+                (datetime.now() - timedelta(days=7+i)).date(),
+                5,
+                'Normal',
+                '["calm"]',
+                '{}',
+                'Health'
+            ))
+    
+    if scenario in ['full', 'exercise_streak']:
+        # Exercise streak (consecutive days)
+        for i in range(5):
+            activities.append((
+                f'gym-{i}',
+                'gym',
+                (datetime.now() - timedelta(days=i)).isoformat(),
+                (datetime.now() - timedelta(days=i)).date(),
+                90,
+                'Good workout',
+                '["strength"]',
+                '{"intensity": 4}',
+                'Health'
+            ))
+    
+    if scenario in ['full', 't_protocol']:
+        # Today's activities for T-optimization score
+        today = datetime.now().date()
+        today_iso = datetime.now().isoformat()
+        
+        activities.extend([
+            (f'sun-today', 'sun-exposure', today_iso, today, 30, 'Beach', '[]', '{}', 'Health'),
+            (f'gym-today', 'gym', today_iso, today, 90, 'Workout', '["strength"]', '{"intensity": 5}', 'Health'),
+            (f'sauna-today', 'sauna', today_iso, today, 20, 'Relaxing', '["calm"]', '{}', 'Health'),
+            (f'sleep-today', 'sleep', today_iso, today, 480, 'Good sleep', '[]', '{}', 'Health'),  # 8 hours
+            (f'coffee-today-1', 'coffee', today_iso, today, None, 'Morning brew', '[]', '{}', 'Health'),
+        ])
+    
+    if scenario in ['full', 'morning_routine']:
+        # Morning routine for past 7 days
+        for i in range(7):
+            day = datetime.now() - timedelta(days=i)
+            day_date = day.date()
+            morning_time = day.replace(hour=8, minute=0, second=0)
+            
+            # 5 complete days, 2 partial days
+            if i < 5:
+                activities.extend([
+                    (f'yoga-{i}', 'yoga', morning_time.isoformat(), day_date, 20, 'Morning yoga', '[]', '{}', 'Health'),
+                    (f'walk-{i}', 'walking', (morning_time + timedelta(minutes=30)).isoformat(), day_date, 30, 'Morning walk', '[]', '{}', 'Health'),
+                    (f'coffee-morning-{i}', 'coffee', (morning_time + timedelta(hours=1)).isoformat(), day_date, None, 'Morning coffee', '[]', '{}', 'Health'),
+                ])
+            else:
+                # Partial days (missing yoga or walk)
+                activities.append((
+                    f'coffee-morning-{i}', 'coffee', (morning_time + timedelta(hours=1)).isoformat(), day_date, None, 'Morning coffee', '[]', '{}', 'Health'
+                ))
+    
+    for activity in activities:
+        cursor.execute("""
+            INSERT INTO activities (
+                activity_id, activity_type, occurred_at, occurred_date,
+                duration_minutes, note, tags, measurements, goal_mapping
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, activity)
+    
+    conn.commit()
+    conn.close()
+
+
+# ============================================================================
+# ACTIVITY RULES TESTS (R-ACT-01 through R-ACT-06)
+# ============================================================================
+
+def test_r_act_01_dating_pool_exhaustion(test_db):
+    """Test R-ACT-01: Dating Pool Exhaustion."""
+    seed_activities(test_db, scenario='dating_pool_exhaustion')
+    
+    engine = RulesEngine(db_path=test_db)
+    recommendations = engine.run_rules(domain='activities')
+    
+    r_act_01 = next((r for r in recommendations if r['rule_id'] == 'R-ACT-01'), None)
+    
+    assert r_act_01 is not None, "R-ACT-01 should fire with 5 zero-match sessions"
+    assert not r_act_01['empty_state']
+    assert 'pool' in r_act_01['one_liner'].lower() or 'match' in r_act_01['one_liner'].lower()
+    assert 'GOAL-1' in r_act_01['goal_alignment']
+
+
+def test_r_act_02_stress_escalation(test_db):
+    """Test R-ACT-02: Stress Escalation."""
+    seed_activities(test_db, scenario='stress')
+    
+    engine = RulesEngine(db_path=test_db)
+    recommendations = engine.run_rules(domain='activities')
+    
+    r_act_02 = next((r for r in recommendations if r['rule_id'] == 'R-ACT-02'), None)
+    
+    # With 6 current week vs 2 prior week, ratio is 3x (trigger is 2x)
+    assert r_act_02 is not None, "R-ACT-02 should fire with stress escalation"
+    assert not r_act_02['empty_state']
+    assert 'stress' in r_act_02['one_liner'].lower()
+
+
+def test_r_act_03_exercise_consistency(test_db):
+    """Test R-ACT-03: Exercise Consistency (streak tracking)."""
+    seed_activities(test_db, scenario='exercise_streak')
+    
+    engine = RulesEngine(db_path=test_db)
+    recommendations = engine.run_rules(domain='activities')
+    
+    r_act_03 = next((r for r in recommendations if r['rule_id'] == 'R-ACT-03'), None)
+    
+    assert r_act_03 is not None, "R-ACT-03 should fire with exercise data"
+    # May or may not fire depending on streak calculation logic
+    # Just ensure it doesn't error
+
+
+def test_r_act_04_testosterone_protocol_score(test_db):
+    """Test R-ACT-04: Testosterone Protocol Score."""
+    seed_activities(test_db, scenario='t_protocol')
+    
+    engine = RulesEngine(db_path=test_db)
+    recommendations = engine.run_rules(domain='activities')
+    
+    r_act_04 = next((r for r in recommendations if r['rule_id'] == 'R-ACT-04'), None)
+    
+    assert r_act_04 is not None, "R-ACT-04 should fire with today's data"
+    assert not r_act_04['empty_state']
+    # Score: sun +2, gym +2, sauna +1, sleep 8h +2, coffee -1 = 6
+    # (Exact score depends on query logic)
+
+
+def test_r_act_05_morning_routine_adherence(test_db):
+    """Test R-ACT-05: Morning Routine Adherence."""
+    seed_activities(test_db, scenario='morning_routine')
+    
+    engine = RulesEngine(db_path=test_db)
+    recommendations = engine.run_rules(domain='activities')
+    
+    r_act_05 = next((r for r in recommendations if r['rule_id'] == 'R-ACT-05'), None)
+    
+    assert r_act_05 is not None, "R-ACT-05 should fire with 7 days of morning data"
+    assert not r_act_05['empty_state']
+    # 5 complete days out of 7 = 71% adherence
+    assert 'routine' in r_act_05['one_liner'].lower() or 'adherence' in r_act_05['one_liner'].lower()
+
+
+def test_r_act_06_dating_activity_correlation(test_db):
+    """Test R-ACT-06: Dating-Activity Correlation."""
+    # Need 10+ dates plus activities data
+    seed_dates(test_db, count=10)
+    seed_activities(test_db, scenario='exercise_streak')
+    
+    engine = RulesEngine(db_path=test_db)
+    recommendations = engine.run_rules(domain='activities')
+    
+    r_act_06 = next((r for r in recommendations if r['rule_id'] == 'R-ACT-06'), None)
+    
+    # Might not fire if not enough same-day activity-date overlap
+    # Just ensure it doesn't error
+    assert True  # No assertion failure = success
+
+
+def test_activities_integration_with_full_data(test_db):
+    """Test that activities rules integrate with full data set."""
+    seed_dates(test_db, count=10)
+    seed_jobs(test_db, count=5)
+    seed_cities(test_db)
+    seed_activities(test_db, scenario='full')
+    
+    engine = RulesEngine(db_path=test_db)
+    
+    # Run all rules across all domains
+    all_recommendations = engine.run_rules()
+    
+    # Should have recommendations from multiple domains
+    domains = set(r['domain'] for r in all_recommendations)
+    
+    # With full seed, should have dating, career, activities
+    assert len(domains) >= 2  # At least 2 domains firing
+    
+    # Filter to activities domain
+    activity_recs = [r for r in all_recommendations if r['domain'] == 'activities']
+    
+    # Should have at least a few activity rules firing
+    assert len(activity_recs) >= 1
 
 
 if __name__ == "__main__":

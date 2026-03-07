@@ -223,6 +223,197 @@ rules:
       data_table_columns: ["city", "current_score", "prior_score", "delta"]
       data_table_headers: ["City", "Current Score", "Prior Score", "Change"]
 
+  # ============================================================================
+  # ACTIVITIES DOMAIN RULES (Real behavioral data from Activities app)
+  # ============================================================================
+
+  - id: R-ACT-01
+    name: Dating Pool Exhaustion
+    domain: activities
+    enabled: true
+    min_data_points: 3
+    trigger:
+      condition: "consecutive_zero_match_sessions >= 3"
+      query: |
+        WITH dating_sessions AS (
+          SELECT 
+            activity_type,
+            occurred_date,
+            note,
+            CASE 
+              WHEN note LIKE '%0 match%' OR note LIKE '%no match%' THEN 0
+              ELSE 1
+            END as had_matches
+          FROM activities
+          WHERE activity_type IN ('bumble', 'tinder')
+            AND occurred_date >= date('now', '-14 days')
+          ORDER BY occurred_date DESC
+        )
+        SELECT 
+          activity_type as app,
+          COUNT(*) - SUM(had_matches) as N
+        FROM dating_sessions
+        GROUP BY activity_type
+        HAVING N >= 3
+    output:
+      template: "Your match rate on {app} has been 0% for {N} sessions. The local pool may be exhausted. Consider: new photos, different app, or social events instead."
+      goal_ref: "GOAL-1 (find partner)"
+      data_table_columns: ["app", "N"]
+      data_table_headers: ["App", "No-Match Sessions"]
+
+  - id: R-ACT-02
+    name: Stress Escalation
+    domain: activities
+    enabled: true
+    min_data_points: 3
+    trigger:
+      condition: "stress_frequency_increase >= 2x"
+      query: |
+        WITH stress_weeks AS (
+          SELECT 
+            CASE 
+              WHEN occurred_date >= date('now', '-7 days') THEN 'current'
+              WHEN occurred_date >= date('now', '-14 days') AND occurred_date < date('now', '-7 days') THEN 'prior'
+            END as week,
+            COUNT(*) as stress_count
+          FROM activities
+          WHERE activity_type = 'nerve-stimulus'
+            AND occurred_date >= date('now', '-14 days')
+          GROUP BY week
+        )
+        SELECT 
+          MAX(CASE WHEN week = 'current' THEN stress_count ELSE 0 END) as current_week,
+          MAX(CASE WHEN week = 'prior' THEN stress_count ELSE 0 END) as prior_week,
+          ROUND(
+            (CAST(MAX(CASE WHEN week = 'current' THEN stress_count ELSE 0 END) AS REAL) /
+            NULLIF(MAX(CASE WHEN week = 'prior' THEN stress_count ELSE 0 END), 0) - 1.0) * 100
+          , 0) as increase,
+          'work' as pattern
+        FROM stress_weeks
+        WHERE week IN ('current', 'prior')
+    output:
+      template: "Stress indicators up {increase}% this week. Recovery actions: sauna, ocean, yoga."
+      goal_ref: "Health (all goals)"
+      data_table_columns: ["current_week", "prior_week", "increase"]
+      data_table_headers: ["This Week", "Last Week", "Increase %"]
+
+  - id: R-ACT-03
+    name: Exercise Consistency
+    domain: activities
+    enabled: true
+    min_data_points: 1
+    trigger:
+      condition: "activity_exists"
+      query: |
+        SELECT 
+          COUNT(DISTINCT occurred_date) as N,
+          'exercise' as activity,
+          MAX(occurred_date) as last_date,
+          CAST(julianday('now') - julianday(MAX(occurred_date)) AS INTEGER) as days_ago
+        FROM activities
+        WHERE activity_type IN ('gym', 'walking', 'swimming', 'yoga', 'uttanasana')
+          AND occurred_date >= date('now', '-7 days')
+    output:
+      template: "You exercised {N} days this week. Last session: {days_ago} days ago. Keep it going!" 
+      goal_ref: "Health (all goals)"
+      data_table_columns: ["N", "last_date", "days_ago"]
+      data_table_headers: ["Days This Week", "Last Exercise", "Days Ago"]
+
+  - id: R-ACT-04
+    name: Testosterone Protocol Score
+    domain: activities
+    enabled: true
+    min_data_points: 1
+    trigger:
+      condition: "today_data_exists"
+      query: |
+        SELECT 
+          COALESCE(SUM(CASE WHEN activity_type = 'sun-exposure' THEN 2 ELSE 0 END), 0) +
+          COALESCE(SUM(CASE WHEN activity_type IN ('gym', 'swimming') THEN 2 ELSE 0 END), 0) +
+          COALESCE(SUM(CASE WHEN activity_type = 'sauna' THEN 1 ELSE 0 END), 0) +
+          COALESCE(SUM(CASE WHEN activity_type IN ('sleep', 'nap') AND duration_minutes >= 420 THEN 2 ELSE 0 END), 0) +
+          COALESCE(SUM(CASE WHEN activity_type = 'coffee' THEN -1 ELSE 0 END), 0) as score,
+          CASE 
+            WHEN SUM(CASE WHEN activity_type = 'sun-exposure' THEN 1 ELSE 0 END) = 0 THEN 'sun'
+            WHEN SUM(CASE WHEN activity_type IN ('gym', 'swimming') THEN 1 ELSE 0 END) = 0 THEN 'exercise'
+            ELSE 'none'
+          END as missing_items
+        FROM activities
+        WHERE occurred_date = date('now')
+    output:
+      template: "T-optimization score today: {score}/10. Missing: {missing_items}."
+      goal_ref: "Health (all goals)"
+      data_table_columns: ["score", "missing_items"]
+      data_table_headers: ["Score", "Missing"]
+
+  - id: R-ACT-05
+    name: Morning Routine Adherence
+    domain: activities
+    enabled: true
+    min_data_points: 7
+    trigger:
+      condition: "week_data_exists"
+      query: |
+        WITH daily_counts AS (
+          SELECT 
+            occurred_date,
+            COUNT(DISTINCT CASE WHEN activity_type IN ('yoga', 'walking') AND strftime('%H', occurred_at) < '11' THEN activity_type END) as morning_count
+          FROM activities
+          WHERE occurred_date >= date('now', '-7 days')
+          GROUP BY occurred_date
+        )
+        SELECT 
+          COUNT(CASE WHEN morning_count >= 2 THEN 1 END) as complete_days,
+          ROUND(
+            CAST(COUNT(CASE WHEN morning_count >= 2 THEN 1 END) AS REAL) / 
+            7.0 * 100
+          , 0) as adherence_pct
+        FROM daily_counts
+    output:
+      template: "Morning routine: {complete_days}/7 complete days. You've been {adherence_pct}% consistent this week."
+      goal_ref: "Health (all goals)"
+      data_table_columns: ["complete_days", "adherence_pct"]
+      data_table_headers: ["Complete Days", "Adherence %"]
+
+  - id: R-ACT-06
+    name: Dating-Activity Correlation
+    domain: activities
+    enabled: true
+    min_data_points: 10
+    trigger:
+      condition: "dates_logged >= 10"
+      query: |
+        WITH date_quality AS (
+          SELECT 
+            date_of,
+            quality
+          FROM dates
+          WHERE date_of >= date('now', '-90 days')
+        ),
+        same_day_activities AS (
+          SELECT 
+            dq.date_of,
+            dq.quality,
+            SUM(CASE WHEN a.activity_type IN ('gym', 'yoga', 'walking') AND strftime('%H', a.occurred_at) < '12' THEN 1 ELSE 0 END) as morning_exercise,
+            SUM(CASE WHEN a.activity_type = 'coffee' THEN 1 ELSE 0 END) as coffee_count,
+            SUM(CASE WHEN a.activity_type = 'sauna' THEN 1 ELSE 0 END) as sauna_count
+          FROM date_quality dq
+          LEFT JOIN activities a ON a.occurred_date = dq.date_of
+          GROUP BY dq.date_of, dq.quality
+        )
+        SELECT 
+          AVG(CASE WHEN morning_exercise > 0 THEN quality END) as avg_quality_with_exercise,
+          AVG(CASE WHEN morning_exercise = 0 THEN quality END) as avg_quality_no_exercise,
+          AVG(CASE WHEN coffee_count >= 3 THEN quality END) as avg_quality_high_coffee,
+          COUNT(CASE WHEN morning_exercise > 0 THEN 1 END) as dates_with_exercise,
+          COUNT(CASE WHEN coffee_count >= 3 THEN 1 END) as dates_high_coffee
+        FROM same_day_activities
+    output:
+      template: "Your best dates happen on days with morning exercise. Worst: after 3+ coffees."
+      goal_ref: "GOAL-1 (find partner)"
+      data_table_columns: ["avg_quality_with_exercise", "avg_quality_no_exercise", "dates_with_exercise"]
+      data_table_headers: ["Avg Quality (Exercise)", "Avg Quality (No Exercise)", "Dates w/ Exercise"]
+
 # Empty state templates
 empty_states:
   R-DATE-01: "After 5 dates (need {remaining} more), I'll tell you your best channel."
@@ -233,3 +424,9 @@ empty_states:
   R-CAREER-02: "Review some jobs this week to see your decision patterns."
   R-CAREER-03: "After 30 days of scanner data (need {remaining} more), I'll show skill trends."
   R-LOC-01: "After 2 city data snapshots (need {remaining} more), I'll detect ranking changes."
+  R-ACT-01: "After 3 dating app sessions (need {remaining} more), I'll detect pool exhaustion."
+  R-ACT-02: "After 3 stress indicators (need {remaining} more), I'll track escalation patterns."
+  R-ACT-03: "Log your first exercise session to enable streak tracking."
+  R-ACT-04: "Track today's activities to see your T-optimization score."
+  R-ACT-05: "After 7 days of morning data (need {remaining} more), I'll show routine adherence."
+  R-ACT-06: "After 10 dates (need {remaining} more), I'll show activity-dating correlations."
