@@ -1,0 +1,25 @@
+[Unit]
+Description=Life Systems - Evening Activities Digest
+Documentation=https://github.com/kevin-bot-openclaw-ops/life-systems
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/opt/life-systems
+EnvironmentFile=/etc/life-systems/env
+ExecStart=/usr/bin/python3 /opt/life-systems/scripts/send_evening_digest.py
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=evening-digest
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/life-systems
+ReadWritePaths=/var/lib/life-systems
+
+[Install]
+WantedBy=multi-user.target
