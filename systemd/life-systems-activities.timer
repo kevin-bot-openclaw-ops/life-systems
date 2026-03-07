@@ -1,0 +1,11 @@
+[Unit]
+Description=Life Systems Activities Sync Timer
+Requires=life-systems-activities.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=4h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
