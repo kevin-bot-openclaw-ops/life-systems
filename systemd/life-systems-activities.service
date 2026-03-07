@@ -1,0 +1,15 @@
+[Unit]
+Description=Life Systems - Activities Sync
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/opt/life-systems
+Environment="PYTHONPATH=/opt/life-systems"
+ExecStart=/usr/bin/python3 -m activities.bridge
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
