@@ -96,10 +96,27 @@ journalctl -u evening-digest.service -n 50
 ```
 
 ### 5. Environment Variables
-Ensure `/etc/life-systems/env` contains:
+
+**REQUIRED**: Add Slack bot token to `/etc/life-systems/env`:
+
 ```bash
-SLACK_BOT_TOKEN=xoxb-...your-token...
+sudo bash -c 'cat >> /etc/life-systems/env << EOF
+SLACK_BOT_TOKEN=<your-slack-bot-token-here>
+EOF'
 ```
+
+**Where to find the token**: 
+- Kevin's Slack bot token from `/home/ubuntu/.openclaw/config.json` (plugins.slack.token)
+- Or create new bot token at https://api.slack.com/apps
+
+**Test the token**:
+```bash
+source /etc/life-systems/env
+curl -X POST https://slack.com/api/auth.test \
+  -H "Authorization: Bearer $SLACK_BOT_TOKEN"
+```
+
+Should return: `"ok": true`
 
 ## Testing
 
