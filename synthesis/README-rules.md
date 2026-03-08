@@ -1,7 +1,7 @@
 # Life Systems Intelligence Layer — Rules Engine
 
-**Status**: SYNTH-MVP-1 Complete (2026-03-06)  
-**Tests**: 14/14 passing  
+**Status**: ACT-MVP-2 Complete (2026-03-08)  
+**Tests**: 21/21 passing (14 original + 6 activity + 1 integration)  
 **Performance**: <1s execution time (ADR-001 requirement ✓)  
 **Cost**: $0 (rules are free, real-time pattern detection)
 
@@ -93,7 +93,7 @@ for rec in recommendations:
 
 ---
 
-## Implemented Rules (8 Total)
+## Implemented Rules (14 Total)
 
 ### Dating Domain (4 Rules)
 
@@ -117,6 +117,19 @@ for rec in recommendations:
 | Rule ID | Name | Trigger | Min Data | Output Example |
 |---------|------|---------|----------|----------------|
 | **R-LOC-01** | City Ranking Change | Composite score changes ≥0.5 | 2 snapshots | "Madrid now scores 8.2 vs Barcelona 7.8. Dating pool is the differentiator (+40%)." |
+
+### Activities Domain (6 Rules) — Real Behavioral Data
+
+**Context**: Jurek logs ALL daily activities (gym, yoga, walking, sauna, swimming, sun exposure, dating apps, coffee, sleep, learning, emotions) in a separate Activities app. These rules analyze real behavior patterns from that data stream.
+
+| Rule ID | Name | Trigger | Min Data | Output Example |
+|---------|------|---------|----------|----------------|
+| **R-ACT-01** | Dating Pool Exhaustion | 3+ consecutive zero-match sessions | 3 sessions | "Your match rate on Tinder has been 0% for 5 sessions. The local pool may be exhausted. Consider: new photos, different app, or social events." |
+| **R-ACT-02** | Stress Escalation | Stress frequency 2x+ in past 7 days | 3 stress events | "Stress indicators up 150% this week. Recovery actions: sauna, ocean, yoga." |
+| **R-ACT-03** | Exercise Consistency | Track exercise streaks | 1 session | "You exercised 5 days this week. Last session: 1 day ago. Keep it going!" |
+| **R-ACT-04** | Testosterone Protocol Score | Daily activity score (0-10) | Today's data | "T-optimization score today: 7/10. Missing: sun exposure, cold immersion." |
+| **R-ACT-05** | Morning Routine Adherence | Yoga + walk before 11am | 7 days | "Morning routine: 5/7 complete days. You've been 71% consistent this week." |
+| **R-ACT-06** | Dating-Activity Correlation | Correlate date quality with same-day activities | 10 dates | "Your best dates happen on days with morning exercise. Worst: after 3+ coffees." |
 
 ---
 
