@@ -3,7 +3,7 @@ Advisor View Builder - ACT-M1-1
 Builds Health & Attractiveness Optimizer + Dating Intelligence sections.
 Follows ADR-005 (motivation-first: one-liner + data table + actions).
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
 from .db import get_db
 
@@ -622,5 +622,5 @@ def get_advisor_view() -> Dict[str, Any]:
             "health_optimizer": health,
             "dating_intelligence": dating
         },
-        "timestamp": datetime.utcnow().isoformat() + "Z"
+        "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }

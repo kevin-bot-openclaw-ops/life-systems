@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Life Strategy Advisor</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
+  padding: 16px;
+  line-height: 1.6;
+}
+
+/* Header */
+.header {
+  max-width: 1200px;
+  margin: 0 auto 24px;
+  padding: 20px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+}
+
+.header h1 {
+  font-size: 24px;
+  color: #f0f6fc;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.header .subtitle {
+  color: #8b949e;
+  font-size: 14px;
+}
+
+.header .last-updated {
+  color: #6e7681;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* Section Container */
+.section {
+  max-width: 1200px;
+  margin: 0 auto 24px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-icon {
+  font-size: 28px;
+}
+
+.section-title {
+  font-size: 18px;
+  color: #f0f6fc;
+  font-weight: 600;
+}
+
+.section-goal {
+  font-size: 12px;
+  color: #6e7681;
+  background: #21262d;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+/* One-Liner */
+.one-liner {
+  font-size: 16px;
+  color: #58a6ff;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  padding: 12px 16px;
+  background: #0d1117;
+  border-left: 3px solid #58a6ff;
+  border-radius: 4px;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.metric-label {
+  font-size: 11px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f0f6fc;
+}
+
+.metric-subtext {
+  font-size: 12px;
+  color: #6e7681;
+  margin-top: 4px;
+}
+
+.metric-sparkline {
+  height: 30px;
+  margin-top: 8px;
+}
+
+/* Progress Bar */
+.progress-bar-wrap {
+  height: 8px;
+  background: #21262d;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #238636, #3fb950);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* Checklist */
+.checklist {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #8b949e;
+}
+
+.check-item.complete {
+  color: #3fb950;
+}
+
+.check-icon {
+  font-size: 16px;
+}
+
+/* Data Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #0d1117;
+  color: #8b949e;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #21262d;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid #21262d;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover {
+  background: #0d1117;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #238636;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2ea043;
+}
+
+.btn-secondary {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+}
+
+.btn-secondary:hover {
+  background: #30363d;
+}
+
+.btn-dismiss {
+  background: transparent;
+  color: #6e7681;
+  border: 1px solid #21262d;
+}
+
+.btn-dismiss:hover {
+  background: #21262d;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6e7681;
+}
+
+.spinner {
+  border: 3px solid #21262d;
+  border-top: 3px solid #58a6ff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6e7681;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body {
+    padding: 12px;
+  }
+  
+  .header h1 {
+    font-size: 20px;
+  }
+  
+  .section {
+    padding: 16px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metric-value {
+    font-size: 24px;
+  }
+  
+  .data-table {
+    font-size: 12px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 8px;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+/* Chart Styles */
+.chart-container {
+  height: 120px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 12px;
+}
+
+.mini-chart {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  gap: 4px;
+}
+
+.chart-bar {
+  flex: 1;
+  background: #30363d;
+  border-radius: 2px;
+  min-height: 4px;
+  transition: background 0.2s;
+}
+
+.chart-bar:hover {
+  background: #58a6ff;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧭 Personal Life Strategy Advisor</h1>
+  <div class="subtitle">Actionable intelligence for your highest-leverage goals</div>
+  <div class="last-updated" id="last-updated">Loading...</div>
+</div>
+
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>Loading your advisor data...</div>
+  </div>
+</div>
+
+<script>
+// API Configuration
+const API_BASE = window.location.origin;
+const API_USER = 'jurek';
+const API_PASS = 'testpass123';  // TODO: Replace with actual credentials
+
+// Utilities
+function basicAuth() {
+  return 'Basic ' + btoa(API_USER + ':' + API_PASS);
+}
+
+async function fetchAPI(endpoint) {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: {
+      'Authorization': basicAuth()
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+  
+  return response.json();
+}
+
+async function postAPI(endpoint, data) {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': basicAuth(),
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+  
+  return response.json();
+}
+
+// Sparkline Generator
+function generateSparkline(data, width = 100, height = 30) {
+  if (!data || data.length === 0) return '';
+  
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  
+  const points = data.map((val, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((val - min) / range) * height;
+    return `${x},${y}`;
+  }).join(' ');
+  
+  return `
+    <svg width="${width}" height="${height}" style="display: block;">
+      <polyline
+        points="${points}"
+        fill="none"
+        stroke="#58a6ff"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  `;
+}
+
+// Mini Chart Generator
+function generateMiniChart(data) {
+  if (!data || data.length === 0) return '';
+  
+  const max = Math.max(...data, 1);
+  
+  return `
+    <div class="chart-container">
+      <div class="mini-chart">
+        ${data.map(val => {
+          const heightPct = (val / max) * 100;
+          return `<div class="chart-bar" style="height: ${heightPct}%" title="${val}"></div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Decision Handlers
+async function handleAcceptLog(activityType, durationMinutes) {
+  try {
+    await postAPI('/api/advisor/log-activity', {
+      activity_type: activityType,
+      duration_minutes: durationMinutes,
+      note: 'Logged via advisor dashboard',
+      tags: ['dashboard']
+    });
+    
+    alert(`✅ Logged ${activityType} (${durationMinutes} min)`);
+    loadAdvisorData();  // Refresh
+  } catch (error) {
+    console.error('Failed to log activity:', error);
+    alert('❌ Failed to log activity. Check console for details.');
+  }
+}
+
+async function handleSnooze(recommendationId, hours = 4) {
+  try {
+    await postAPI('/api/advisor/decide', {
+      action: 'snooze',
+      recommendation_id: recommendationId,
+      duration_hours: hours
+    });
+    
+    alert(`⏰ Snoozed for ${hours} hours`);
+    loadAdvisorData();  // Refresh
+  } catch (error) {
+    console.error('Failed to snooze:', error);
+    alert('❌ Failed to snooze. Check console for details.');
+  }
+}
+
+async function handleDismiss(recommendationId) {
+  if (!confirm('Are you sure you want to dismiss this recommendation?')) {
+    return;
+  }
+  
+  try {
+    await postAPI('/api/advisor/decide', {
+      action: 'dismiss',
+      recommendation_id: recommendationId
+    });
+    
+    alert('✓ Recommendation dismissed');
+    loadAdvisorData();  // Refresh
+  } catch (error) {
+    console.error('Failed to dismiss:', error);
+    alert('❌ Failed to dismiss. Check console for details.');
+  }
+}
+
+// Render Functions
+function renderHealthOptimizer(data) {
+  if (!data) return '';
+  
+  const tScore = data.t_score || {};
+  const routine = data.morning_routine || {};
+  const streak = data.exercise_streak || {};
+  const stress = data.stress_trend || {};
+  
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">💪</span>
+        <h2 class="section-title">Health & Attractiveness Optimizer</h2>
+        <span class="section-goal">${data.goal_ref || 'Health (all goals)'}</span>
+      </div>
+      
+      <div class="one-liner">${data.one_liner || 'Loading...'}</div>
+      
+      <div class="metrics-grid">
+        <!-- T-Score -->
+        <div class="metric-card">
+          <div class="metric-label">T-Optimization Score</div>
+          <div class="metric-value">${tScore.score || 0}<span style="font-size: 18px; color: #6e7681;">/10</span></div>
+          <div class="metric-subtext">
+            ${tScore.missing_items && tScore.missing_items.length > 0 
+              ? `Missing: ${tScore.missing_items.join(', ')}`
+              : 'All targets hit ✓'}
+          </div>
+          <div class="metric-sparkline">
+            ${tScore.sparkline ? generateSparkline(tScore.sparkline, 150, 30) : ''}
+          </div>
+        </div>
+        
+        <!-- Morning Routine -->
+        <div class="metric-card">
+          <div class="metric-label">Morning Routine</div>
+          <div class="metric-value">${routine.adherence_pct || 0}%</div>
+          <div class="metric-subtext">${routine.complete_days || 0}/${routine.total_days || 7} days this week</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" style="width: ${routine.adherence_pct || 0}%"></div>
+          </div>
+          ${routine.today_status ? `
+            <div class="checklist">
+              <div class="check-item ${routine.today_status.yoga ? 'complete' : ''}">
+                <span class="check-icon">${routine.today_status.yoga ? '✓' : '○'}</span>
+                Yoga
+              </div>
+              <div class="check-item ${routine.today_status.walk ? 'complete' : ''}">
+                <span class="check-icon">${routine.today_status.walk ? '✓' : '○'}</span>
+                Walk
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        
+        <!-- Exercise Streak -->
+        <div class="metric-card">
+          <div class="metric-label">Exercise Streak</div>
+          <div class="metric-value">${streak.current_streak || 0} days</div>
+          <div class="metric-subtext">
+            Personal best: ${streak.personal_best || 0} days
+            ${streak.last_exercise_date ? `<br>Last: ${streak.last_exercise_date}` : ''}
+          </div>
+        </div>
+        
+        <!-- Stress Trend -->
+        <div class="metric-card">
+          <div class="metric-label">Stress Trend</div>
+          <div class="metric-value" style="font-size: 20px; text-transform: capitalize;">
+            ${stress.trend || 'stable'}
+            ${stress.change_pct ? `<span style="font-size: 16px; color: ${stress.change_pct > 0 ? '#f85149' : '#3fb950'};">
+              ${stress.change_pct > 0 ? '↑' : '↓'} ${Math.abs(stress.change_pct)}%
+            </span>` : ''}
+          </div>
+          <div class="metric-subtext">
+            ${stress.week1_count || 0} → ${stress.week2_count || 0} indicators (2 weeks)
+          </div>
+          ${stress.chart_data ? generateMiniChart(stress.chart_data) : ''}
+        </div>
+      </div>
+      
+      ${data.actions && data.actions.length > 0 ? `
+        <div class="actions">
+          ${data.actions.map(action => {
+            if (action.type === 'accept') {
+              return `
+                <button class="btn btn-primary" onclick="handleAcceptLog('${action.activity_type}', ${action.duration_minutes})">
+                  ${action.label}
+                </button>
+              `;
+            }
+            return '';
+          }).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderDatingIntelligence(data) {
+  if (!data) return '';
+  
+  const pool = data.pool_status || {};
+  const sources = data.source_comparison || {};
+  const correlation = data.activity_correlation || {};
+  
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">💘</span>
+        <h2 class="section-title">Dating Intelligence</h2>
+        <span class="section-goal">${data.goal_ref || 'GOAL-1 (find partner)'}</span>
+      </div>
+      
+      <div class="one-liner">${data.one_liner || 'Loading...'}</div>
+      
+      ${pool.exhausted ? `
+        <div style="margin-bottom: 24px;">
+          <div class="metric-label">⚠️ Dating Pool Status</div>
+          <p style="color: #8b949e; margin: 12px 0;">
+            Pool exhausted on <strong>${pool.exhausted_apps ? pool.exhausted_apps.join(', ') : 'dating apps'}</strong>.
+            ${pool.current_location ? `Current location: ${pool.current_location}` : ''}
+          </p>
+          
+          ${pool.alternative_cities && pool.alternative_cities.length > 0 ? `
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>City</th>
+                  <th>Dating Pool Size</th>
+                  <th>vs Current</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pool.alternative_cities.map(city => `
+                  <tr>
+                    <td><strong>${city.name}</strong></td>
+                    <td>${city.pool_size.toLocaleString()}</td>
+                    <td style="color: #3fb950;">${Math.round(city.pool_size / 200)}x larger</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : ''}
+        </div>
+      ` : ''}
+      
+      ${sources.sources && sources.sources.length > 0 ? `
+        <div style="margin-bottom: 24px;">
+          <div class="metric-label">📊 Source Performance</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Dates</th>
+                <th>Avg Quality</th>
+                <th>Unique People</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sources.sources.map(s => `
+                <tr${s.source === sources.best_source ? ' style="background: rgba(56, 139, 253, 0.1);"' : ''}>
+                  <td>
+                    <strong>${s.source}</strong>
+                    ${s.source === sources.best_source ? ' ⭐' : ''}
+                  </td>
+                  <td>${s.count}</td>
+                  <td>${s.avg_quality.toFixed(1)}/10</td>
+                  <td>${s.unique_people}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : ''}
+      
+      ${correlation.avg_quality_with_exercise ? `
+        <div style="margin-bottom: 24px;">
+          <div class="metric-label">🔄 Activity-Dating Correlation</div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">With Morning Exercise</div>
+              <div class="metric-value" style="font-size: 24px; color: #3fb950;">
+                ${correlation.avg_quality_with_exercise.toFixed(1)}/10
+              </div>
+              <div class="metric-subtext">${correlation.dates_with_exercise || 0} dates</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Without Morning Exercise</div>
+              <div class="metric-value" style="font-size: 24px; color: #f85149;">
+                ${correlation.avg_quality_no_exercise.toFixed(1)}/10
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+      
+      ${data.actions && data.actions.length > 0 ? `
+        <div class="actions">
+          ${data.actions.map(action => {
+            if (action.type === 'view_details') {
+              return `<a href="${action.url}" class="btn btn-secondary">${action.label}</a>`;
+            } else if (action.type === 'snooze') {
+              return `
+                <button class="btn btn-secondary" onclick="handleSnooze('dating-intelligence', ${action.duration_hours || 168})">
+                  ${action.label}
+                </button>
+              `;
+            }
+            return '';
+          }).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderEmptyState() {
+  return `
+    <div class="empty-state">
+      <div class="empty-state-icon">📊</div>
+      <h2 style="color: #f0f6fc; margin-bottom: 12px;">No Data Yet</h2>
+      <p>Start logging activities and dates to unlock intelligence patterns.</p>
+    </div>
+  `;
+}
+
+// Main Load Function
+async function loadAdvisorData() {
+  const appDiv = document.getElementById('app');
+  
+  try {
+    const data = await fetchAPI('/api/advisor');
+    
+    // Update timestamp
+    const timestamp = new Date(data.timestamp || Date.now());
+    document.getElementById('last-updated').textContent = 
+      `Last updated: ${timestamp.toLocaleString()}`;
+    
+    // Render sections
+    const advisor = data.advisor || {};
+    let html = '';
+    
+    if (advisor.health_optimizer) {
+      html += renderHealthOptimizer(advisor.health_optimizer);
+    }
+    
+    if (advisor.dating_intelligence) {
+      html += renderDatingIntelligence(advisor.dating_intelligence);
+    }
+    
+    if (!html) {
+      html = renderEmptyState();
+    }
+    
+    appDiv.innerHTML = html;
+    
+  } catch (error) {
+    console.error('Failed to load advisor data:', error);
+    appDiv.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <h2 style="color: #f0f6fc; margin-bottom: 12px;">Failed to Load Data</h2>
+        <p style="color: #f85149;">${error.message}</p>
+        <button class="btn btn-primary" onclick="loadAdvisorData()" style="margin-top: 20px;">
+          Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  loadAdvisorData();
+  
+  // Auto-refresh every 5 minutes
+  setInterval(loadAdvisorData, 5 * 60 * 1000);
+});
+</script>
+
+</body>
+</html>

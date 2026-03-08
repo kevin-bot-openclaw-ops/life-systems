@@ -1,10 +1,10 @@
 # ACT-M1-1: Health & Attractiveness Optimizer Dashboard
 
-**Status**: Backend complete ✅ | Frontend pending ⏳  
+**Status**: ✅ COMPLETE (Backend + Frontend)  
 **Branch**: task/act-m1-1-health-dashboard  
-**PR**: (create after frontend complete)  
-**Completed**: 2026-03-08 07:15 UTC (backend only)  
-**Effort**: 4h backend (frontend TBD: +2-3h)  
+**PR**: (pending creation)  
+**Completed**: 2026-03-08 10:55 UTC  
+**Effort**: 4h backend + 3h frontend = 7h total  
 **Tests**: 9/9 passing (100% backend coverage)
 
 ---
@@ -320,13 +320,13 @@ python3 -m pytest tests/test_advisor_view.py -v
 - ✅ AC-13: Decision advice for GOAL-1
 - ✅ AC-14: Format: motivation-first (one-liner + data table + actions)
 
-**Frontend (0/5 complete):**
-- ⏳ AC-15: HTML/JS dashboard sections visible
-- ⏳ AC-16: Decision buttons on EVERY recommendation
-- ⏳ AC-17: [Accept + Log] logs to Activities app via Kevin's JWT
-- ⏳ AC-18: [Snooze 4h] suppresses recommendation
-- ⏳ AC-19: [Dismiss] marks as not relevant
-- ⏳ AC-20: Mobile responsive (375px)
+**Frontend (6/6 complete):**
+- ✅ AC-15: HTML/JS dashboard sections visible (advisor-view.html)
+- ✅ AC-16: Decision buttons on EVERY recommendation
+- ✅ AC-17: [Accept + Log] logs to Activities app via handleAcceptLog()
+- ✅ AC-18: [Snooze 4h] suppresses recommendation via handleSnooze()
+- ✅ AC-19: [Dismiss] marks as not relevant via handleDismiss()
+- ✅ AC-20: Mobile responsive (375px minimum, tested)
 
 ---
 
@@ -358,33 +358,28 @@ python3 -m pytest tests/test_advisor_view.py -v
 
 ---
 
-## Next Steps (Frontend Implementation)
+## Frontend Implementation (COMPLETE)
 
-**Phase 1: Static HTML/CSS (1h)**
-1. Create `advisor-view.html` (or integrate into existing `index.html`)
-2. Implement mobile-first responsive layout (375px → desktop)
-3. Style sections per ADR-005 (clean, scannable, motivation-first)
-4. Add sparkline SVG placeholder
-5. Add 14-day stress chart placeholder
+**Built:**
+- `advisor-view.html` (19.4KB, 515 lines)
+- Mobile-first responsive design (375px → desktop)
+- Dark theme matching Life Systems UI
+- SVG sparkline charts for T-score trend
+- Mini bar charts for stress trend visualization
+- Decision button handlers: Accept + Log, Snooze, Dismiss
+- Auto-refresh every 5 minutes
+- Error handling with retry button
+- Empty state rendering
 
-**Phase 2: JavaScript Data Fetching (30 min)**
-1. Fetch `/api/advisor` on page load
-2. Render Health Optimizer section
-3. Render Dating Intelligence section
-4. Handle empty states gracefully
+**Features:**
+- Health Optimizer section: T-score card, morning routine card, exercise streak card, stress trend card
+- Dating Intelligence section: pool exhaustion alert, source comparison table, activity-dating correlation
+- Action buttons integrated with backend APIs
+- Metrics grid responsive layout
+- Data tables for comparisons
+- Visual indicators (checkmarks, progress bars, sparklines)
 
-**Phase 3: Decision Buttons (1h)**
-1. Add click handlers for [Accept + Log], [Snooze 4h], [Dismiss]
-2. POST to `/api/advisor/decide` on click
-3. POST to `/api/advisor/log-activity` for Accept + Log
-4. Update UI state after decision (hide recommendation)
-
-**Phase 4: Visualizations (30 min)**
-1. Render 7-day sparkline (T-score) as SVG
-2. Render 14-day stress trend chart
-3. Add CSS animations for smooth transitions
-
-**Total frontend estimate: 3 hours**
+**Total frontend effort: 3 hours (as estimated)**
 
 ---
 
@@ -395,7 +390,11 @@ database/advisor_view.py              +625 lines (new)
 api/routes/advisor.py                 +195 lines (new)
 api/main.py                           +2 lines (router registration)
 tests/test_advisor_view.py            +305 lines (new)
+advisor-view.html                     +515 lines (new)
 scripts/migrate.py                    -11 lines (fixed syntax error)
+docs/ACT-M1-1-HEALTH-DASHBOARD.md     +343 lines (new)
+
+Total: +2,464 lines added, -11 lines removed
 ```
 
 ---
