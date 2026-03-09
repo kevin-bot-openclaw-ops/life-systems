@@ -1,0 +1,18 @@
+[Unit]
+Description=Life Systems - Morning Readiness Nudge (8AM)
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/.openclaw/workspace/life-systems-app
+Environment="PYTHONPATH=/home/ubuntu/.openclaw/workspace/life-systems-app"
+Environment="SLACK_BOT_TOKEN="
+EnvironmentFile=-/etc/life-systems/env
+ExecStart=/usr/bin/python3 /home/ubuntu/.openclaw/workspace/life-systems-app/scripts/send_morning_readiness_nudge.py
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=morning-readiness
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=Life Systems - Morning Readiness Nudge Timer (8AM CET)
+Requires=morning-readiness-nudge.service
+
+[Timer]
+OnCalendar=*-*-* 07:00:00
+Persistent=true
+Unit=morning-readiness-nudge.service
+
+[Install]
+WantedBy=timers.target

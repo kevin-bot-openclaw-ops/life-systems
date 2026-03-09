@@ -28,6 +28,7 @@ except ImportError:
 # Import v5 routers
 from .routes import dates as dates_router
 from .routes import advisor as advisor_router
+from .routes import readiness as readiness_router
 
 
 # Initialize FastAPI app
@@ -40,6 +41,7 @@ app = FastAPI(
 # Register v5 routers
 app.include_router(dates_router.router)
 app.include_router(advisor_router.router)
+app.include_router(readiness_router.router)
 
 # Basic auth
 security = HTTPBasic()
