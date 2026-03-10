@@ -94,7 +94,7 @@ class TestDatingMetrics:
     
     def test_metrics_empty_database(self, test_db):
         """Test metrics with no data."""
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         metrics = monitor.get_dating_metrics(days=7)
         
         assert metrics.total_swipes == 0
@@ -107,7 +107,7 @@ class TestDatingMetrics:
         create_dating_activity(test_db, "bumble", days_ago=1, 
                              swipes=30, right=25, left=5, matches=2)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         metrics = monitor.get_dating_metrics(days=7)
         
         assert metrics.total_swipes == 30
@@ -122,7 +122,7 @@ class TestDatingMetrics:
         create_dating_activity(test_db, "tinder", days_ago=2, 
                              swipes=20, right=18, left=2, matches=1)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         metrics = monitor.get_dating_metrics(days=7)
         
         assert metrics.total_swipes == 50
@@ -137,7 +137,7 @@ class TestDatingMetrics:
         create_dating_activity(test_db, "bumble", days_ago=10, 
                              swipes=30, right=25, left=5)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         metrics_7d = monitor.get_dating_metrics(days=7)
         metrics_14d = monitor.get_dating_metrics(days=14)
         
@@ -151,7 +151,7 @@ class TestDatingMetrics:
         create_dating_activity(test_db, "tinder", days_ago=2, 
                              swipes=20, right=18, left=2, location="madrid")
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         metrics_corralejo = monitor.get_dating_metrics(days=7, location="corralejo")
         metrics_madrid = monitor.get_dating_metrics(days=7, location="madrid")
         
@@ -168,7 +168,7 @@ class TestPoolAlerts:
         create_dating_activity(test_db, "bumble", days_ago=1, 
                              swipes=30, right=25, left=5, matches=3, dates=2)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         alert = monitor.generate_alert()
         
         assert alert is None
@@ -181,7 +181,7 @@ class TestPoolAlerts:
         create_dating_activity(test_db, "tinder", days_ago=3, 
                              swipes=20, right=20, left=0, matches=0)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         alert = monitor.generate_alert()
         
         assert alert is not None
@@ -197,7 +197,7 @@ class TestPoolAlerts:
         create_dating_activity(test_db, "tinder", days_ago=8, 
                              swipes=20, right=20, left=0, matches=0, dates=0)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         alert = monitor.generate_alert()
         
         assert alert is not None
@@ -215,7 +215,7 @@ class TestPoolAlerts:
                                  swipes=10, right=8, left=2, matches=0, dates=0,
                                  location="corralejo")
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         days_in_location = monitor.get_days_in_current_location()
         alert = monitor.generate_alert()
         
@@ -233,7 +233,7 @@ class TestPoolAlerts:
         create_dating_activity(test_db, "tinder", days_ago=8, 
                              swipes=20, right=20, left=0, matches=0, dates=0)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         alert = monitor.generate_alert()
         
         assert alert is not None
@@ -247,7 +247,7 @@ class TestPoolAlerts:
         create_dating_activity(test_db, "tinder", days_ago=3, 
                              swipes=20, right=20, left=0, matches=0)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         alert = monitor.generate_alert()
         
         assert alert is not None
@@ -265,7 +265,7 @@ class TestDashboardCard:
         create_dating_activity(test_db, "bumble", days_ago=1, 
                              swipes=30, right=25, left=5, matches=3, dates=1)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         card = monitor.get_dashboard_card()
         
         assert card["status"] == "HEALTHY"
@@ -280,7 +280,7 @@ class TestDashboardCard:
         create_dating_activity(test_db, "tinder", days_ago=8, 
                              swipes=20, right=20, left=0, matches=0, dates=0)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         card = monitor.get_dashboard_card()
         
         assert card["status"] == "DEPLETED"
@@ -297,7 +297,7 @@ class TestLocationTracking:
         create_dating_activity(test_db, "bumble", days_ago=1, 
                              swipes=30, right=25, left=5)
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         days = monitor.get_days_in_current_location()
         
         assert days == 0
@@ -308,7 +308,7 @@ class TestLocationTracking:
             create_dating_activity(test_db, "bumble", days_ago=days_ago, 
                                  swipes=10, right=8, left=2, location="corralejo")
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         days = monitor.get_days_in_current_location()
         
         assert days == 5
@@ -325,7 +325,7 @@ class TestLocationTracking:
             create_dating_activity(test_db, "bumble", days_ago=days_ago, 
                                  swipes=10, right=8, left=2, location="corralejo")
         
-        monitor = DatingPoolMonitor(test_db)
+        monitor = DatingPoolMonitor(test_db, use_api=False)
         days = monitor.get_days_in_current_location()
         
         assert days == 3  # Only Madrid days
