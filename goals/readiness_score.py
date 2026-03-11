@@ -188,7 +188,13 @@ class ReadinessScoreEngine:
         
         # 3. Sleep (≥7h = full, 6h = half, <5h = 0)
         sleep_today = today_stats.get('sleep', {})
-        sleep_duration = sleep_today.get('totalDurationMin', 0) or 0
+        sleep_duration_min = sleep_today.get('totalDurationMin', 0) or 0
+        # Fallback: check measurements.duration (in hours, need to convert)
+        if sleep_duration_min == 0:
+            measurements = sleep_today.get('measurements', {})
+            sleep_hours = measurements.get('duration', 0) or 0
+            sleep_duration_min = sleep_hours * 60
+        sleep_duration = sleep_duration_min
         
         sleep_points = 0.0
         if sleep_duration >= 420:  # 7h
