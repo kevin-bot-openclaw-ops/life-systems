@@ -25,12 +25,14 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Register v5 routers (all with /api prefix for consistency)
-app.include_router(dates_router.router, prefix="/api")
-app.include_router(readiness_router.router, prefix="/api")
+# Register v5 routers
+# Note: dates, readiness, cities already have /api prefix in their router definition
+app.include_router(dates_router.router)  # Has prefix="/api/dates" in file
+app.include_router(readiness_router.router)  # Has prefix="/api/readiness" in file
+app.include_router(cities_router.router)  # Has prefix="/api/cities" in file
+# advisor and jobs need /api prefix added here
 app.include_router(advisor_router.router, prefix="/api")
 app.include_router(jobs_router.router, prefix="/api")
-app.include_router(cities_router.router, prefix="/api")
 
 # Basic auth
 security = HTTPBasic()
