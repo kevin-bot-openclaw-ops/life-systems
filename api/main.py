@@ -44,11 +44,11 @@ app = FastAPI(
 )
 
 # Register v5 routers
-app.include_router(dates_router.router)
-app.include_router(cities_router.router)
+app.include_router(dates_router.router, prefix="/api")
+app.include_router(cities_router.router, prefix="/api")
 app.include_router(jobs_router.router, prefix="/api")
-app.include_router(advisor_router.router)
-app.include_router(readiness_router.router)
+app.include_router(advisor_router.router, prefix="/api")
+app.include_router(readiness_router.router, prefix="/api")
 
 # Basic auth
 security = HTTPBasic()
