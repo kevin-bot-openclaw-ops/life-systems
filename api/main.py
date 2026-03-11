@@ -29,6 +29,8 @@ except ImportError:
 from .routes import dates as dates_router
 from .routes import cities as cities_router
 from .routes import jobs as jobs_router
+from .routes import advisor as advisor_router
+from .routes import readiness as readiness_router
 
 # Import v5 models for backward compatibility
 from .models import JobResponse as Job
@@ -45,6 +47,8 @@ app = FastAPI(
 app.include_router(dates_router.router)
 app.include_router(cities_router.router)
 app.include_router(jobs_router.router, prefix="/api")
+app.include_router(advisor_router.router)
+app.include_router(readiness_router.router)
 
 # Basic auth
 security = HTTPBasic()

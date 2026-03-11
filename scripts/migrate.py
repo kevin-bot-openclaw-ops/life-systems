@@ -269,14 +269,3 @@ if __name__ == "__main__":
     init_db()
     
     print("\n✅ Migration complete!")
-
-# Add scans table for job scanner logging
-CREATE TABLE IF NOT EXISTS scans (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sources INTEGER NOT NULL,
-    jobs_found INTEGER NOT NULL,
-    jobs_new INTEGER NOT NULL,
-    duration_seconds REAL,
-    errors TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
