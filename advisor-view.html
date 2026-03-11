@@ -740,7 +740,7 @@ async function loadAdvisorData() {
   const appDiv = document.getElementById('app');
   
   try {
-    const data = await fetchAPI('/api/dashboard');
+    const data = await fetchAPI('/api/dashboard?v=' + Date.now());
     
     // Update timestamp
     const timestamp = new Date(data.timestamp || Date.now());
