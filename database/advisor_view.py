@@ -15,8 +15,27 @@ def build_health_optimizer_view(conn) -> Dict[str, Any]:
     """
     today = datetime.now().date().isoformat()
     
-    # 1. T-optimization score (0-10)
-    t_score_data = calculate_t_optimization_score(conn, today)
+    # 1. T-optimization score (use live readiness API)
+    try:
+        from goals.readiness_score import ReadinessScoreEngine
+        engine = ReadinessScoreEngine()
+        readiness = engine.compute_score(date=today)
+        # Use readiness score directly (it's more accurate than local DB)
+        breakdown_dict = {}
+        for item in readiness['breakdown']:
+            comp = item['component'].lower().replace(' ', '-').replace('resistance-training', 'exercise').replace('sun-exposure', 'sun').replace('cold/heat-stress', 'cold').replace('sleep-quality', 'sleep').replace('low-cortisol', 'coffee_penalty')
+            breakdown_dict[comp] = item['earned']
+        
+        t_score_data = {
+            'score': int(readiness['score'] * 10 / 7.0),  # Scale 0-7.0 to 0-10
+            'max_score': 10,
+            'breakdown': breakdown_dict,
+            'missing_items': [item['component'].lower().split()[0] for item in readiness['breakdown'] if item['status'] == 'missing'],
+            'sparkline': calculate_t_score_sparkline(conn)
+        }
+    except Exception as e:
+        # Fallback to local DB if readiness API fails
+        t_score_data = calculate_t_optimization_score(conn, today)
     
     # 2. Morning routine adherence (last 7 days)
     morning_routine = calculate_morning_routine_adherence(conn)
