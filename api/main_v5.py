@@ -14,6 +14,9 @@ import secrets
 # Import v5 routers
 from .routes import dates as dates_router
 from .routes import readiness as readiness_router
+from .routes import advisor as advisor_router
+from .routes import jobs as jobs_router
+from .routes import cities as cities_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -22,9 +25,12 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Register v5 routers
-app.include_router(dates_router.router)
-app.include_router(readiness_router.router)
+# Register v5 routers (all with /api prefix for consistency)
+app.include_router(dates_router.router, prefix="/api")
+app.include_router(readiness_router.router, prefix="/api")
+app.include_router(advisor_router.router, prefix="/api")
+app.include_router(jobs_router.router, prefix="/api")
+app.include_router(cities_router.router, prefix="/api")
 
 # Basic auth
 security = HTTPBasic()
