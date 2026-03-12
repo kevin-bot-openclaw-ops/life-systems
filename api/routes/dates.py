@@ -1,12 +1,19 @@
 """
 Dating Module Routes (EPIC-001)
 DATE-MVP-1: CRUD endpoints for date logging
+DATE-M1-2: Source conversion tracking
 """
 import sqlite3
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict
 from fastapi import APIRouter, HTTPException, Query
 from ..models import DateCreate, DateResponse, DateUpdate
+
+# Add parent directory to path for database imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from database.date_source_stats import get_source_stats, get_follow_up_details
 
 router = APIRouter(prefix="/api/dates", tags=["dates"])
 
@@ -243,3 +250,38 @@ async def delete_date(date_id: int):
         raise HTTPException(status_code=404, detail="Date not found")
     
     return None
+
+
+@router.get("/source-comparison")
+async def get_source_comparison():
+    """
+    Get source conversion statistics.
+    
+    DATE-M1-2: Source Conversion Tracking
+    AC-1: Dashboard shows dates per source, avg quality per source, follow-up rate
+    AC-2: Follow-up rate = % of first dates that led to 2+ dates with same person
+    AC-3: Ranking: "Your best channel is [X] with [N] quality avg"
+    AC-4: Format: one-liner + comparison table (ADR-005)
+    """
+    comparison = get_source_stats(DB_PATH)
+    follow_ups = get_follow_up_details(DB_PATH)
+    
+    return {
+        "one_liner": comparison.one_liner,
+        "data_table": comparison.data_table,
+        "best_source": comparison.best_source,
+        "best_avg_quality": comparison.best_avg_quality,
+        "sample_size_warning": comparison.sample_size_warning,
+        "follow_up_details": follow_ups,
+        "stats": [
+            {
+                "source": s.source,
+                "date_count": s.date_count,
+                "avg_quality": s.avg_quality,
+                "follow_up_rate": s.follow_up_rate,
+                "people_met": s.people_met,
+                "repeat_dates": s.repeat_dates
+            }
+            for s in comparison.stats
+        ]
+    }
