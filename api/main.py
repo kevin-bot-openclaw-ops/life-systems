@@ -31,6 +31,7 @@ from .routes import cities as cities_router
 from .routes import jobs as jobs_router
 from .routes import advisor as advisor_router
 from .routes import readiness as readiness_router
+from .routes import demo as demo_router
 
 # Import v5 models for backward compatibility
 from .models import JobResponse as Job
@@ -49,6 +50,7 @@ app.include_router(cities_router.router, prefix="/api")
 app.include_router(jobs_router.router, prefix="/api")
 app.include_router(advisor_router.router, prefix="/api")
 app.include_router(readiness_router.router, prefix="/api")
+app.include_router(demo_router.router, prefix="/api")  # Public demo endpoints (no auth)
 
 # Basic auth
 security = HTTPBasic()
@@ -215,6 +217,18 @@ async def trigger_scan(
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+
+@app.get("/demo")
+async def serve_demo():
+    """
+    Serve public portfolio demo page.
+    GOAL2-02: Portfolio Demo Mode — No auth required.
+    """
+    demo_path = Path(__file__).parent.parent / "demo.html"
+    if demo_path.exists():
+        return FileResponse(demo_path)
+    raise HTTPException(status_code=404, detail="Demo page not found")
 
 
 @app.get("/")
