@@ -243,3 +243,26 @@ async def delete_date(date_id: int):
         raise HTTPException(status_code=404, detail="Date not found")
     
     return None
+
+
+@router.get("/quality-trends")
+async def get_quality_trends():
+    """
+    Get date quality trends analysis from Activities API.
+    
+    DATE-M1-1: Rules-Based Quality Trend Analysis
+    - Quality trending up/down/flat over 4 weeks
+    - Best source by quality-weighted conversion
+    - Best day/time for dates
+    - ADR-005 compliant format (one-liner + data table + actions)
+    
+    Returns:
+        Dict with: section, goal_ref, one_liner, data_table, actions, generated_at
+    """
+    from database.date_quality_trends import build_date_quality_trends_view
+    
+    try:
+        result = build_date_quality_trends_view()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing date trends: {str(e)}")
